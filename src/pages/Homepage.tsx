@@ -1,6 +1,7 @@
 // HomePage.tsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import CountryCard from "../components/CountryCard";
 
 const HomePage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -55,24 +56,16 @@ const HomePage = () => {
 
       <div>
         {filteredCountries.length > 0 ? (
-          filteredCountries.map((country: any, index: number) => (
-            <div
-              key={index}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                marginBottom: "10px",
-                fontSize: "18px",
-              }}
-            >
-              <img
-                src={country.flags.svg}
-                alt={`${country.name.common} Flag`}
-                style={{ width: "30px", marginRight: "10px" }}
+          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+            {" "}
+            {filteredCountries.map((country: any) => (
+              <CountryCard
+                key={country.name.common}
+                name={country.name.common}
+                flag={country.flags.svg} // HIGHLIGHT: Übergabe von Props
               />
-              <span>{country.name.common}</span>
-            </div>
-          ))
+            ))}
+          </div>
         ) : (
           <p>No country found.</p>
         )}
