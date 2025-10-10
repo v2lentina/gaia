@@ -11,9 +11,7 @@ const HomePage = () => {
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const response = await axios.get(
-          "https://restcountries.com/v3.1/all?fields=name,flags"
-        );
+        const response = await axios.get("http://localhost:5000/api/countries");
         setCountries(response.data);
         setFilteredCountries(response.data); //show all countries initially
       } catch (error) {
