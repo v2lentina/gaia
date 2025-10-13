@@ -43,9 +43,19 @@ const HomePage = () => {
     const term = event.target.value.toLowerCase();
     setSearchTerm(term);
     // Filter countries based on search term
-    const results = countries.filter((country: any) =>
-      country.name.common.toLowerCase().includes(term)
-    );
+    const results = countries.filter((country: any) => {
+      // First check English name
+      if (country.name.common.toLowerCase().includes(term)) return true;
+
+      // Then check all available translations dynamically
+      if (country.translations) {
+        return Object.values(country.translations).some((translation: any) =>
+          translation.common?.toLowerCase().includes(term)
+        );
+      }
+
+      return false;
+    });
     setFilteredCountries(results);
   };
 
