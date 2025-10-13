@@ -4,13 +4,30 @@
 
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
 import HomePage from "./pages/Homepage";
+
+// Create a theme instance for Material-UI
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#2f70e0ff",
+    },
+    secondary: {
+      main: "#69a51fff",
+    },
+  },
+});
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-    </Routes>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+      </Routes>
+    </ThemeProvider>
   );
 }
 

@@ -19,7 +19,7 @@ app.get("/", (req, res) => {
 app.get("/api/countries", async (req, res) => {
   try {
     const response = await axios.get(
-      "https://restcountries.com/v3.1/all?fields=name,flags"
+      "https://restcountries.com/v3.1/all?fields=name,flags,translations"
     );
     res.json(response.data);
   } catch (error) {
