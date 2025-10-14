@@ -90,7 +90,7 @@ const HomePage = () => {
           <TextField
             fullWidth
             variant="outlined"
-            placeholder="Search for countries..."
+            placeholder="Search for a country..."
             value={searchTerm}
             onChange={handleSearch}
             onFocus={() => setShowDropdown(true)}
@@ -105,7 +105,7 @@ const HomePage = () => {
             sx={{ width: "100%" }}
           />
 
-          {showDropdown && filteredCountries.length > 0 && (
+          {showDropdown && (
             <Paper
               sx={{
                 position: "absolute",
@@ -117,36 +117,40 @@ const HomePage = () => {
                 overflow: "auto",
               }}
             >
-              <List>
-                {filteredCountries.slice(0, 10).map((country: any) => (
-                  <ListItem key={country.name.common} disablePadding>
-                    <ListItemButton
-                      onClick={() => {
-                        navigate(`/country/${country.name.common}`);
-                        setShowDropdown(false);
-                      }}
-                    >
-                      <ListItemAvatar>
-                        <Avatar
-                          src={country.flags.svg}
-                          alt={`${country.name.common} flag`}
-                          sx={{ width: 32, height: 24 }}
-                        />
-                      </ListItemAvatar>
-                      <ListItemText primary={country.name.common} />
-                    </ListItemButton>
-                  </ListItem>
-                ))}
-              </List>
+              {filteredCountries.length > 0 ? (
+                <List>
+                  {filteredCountries.slice(0, 10).map((country: any) => (
+                    <ListItem key={country.name.common} disablePadding>
+                      <ListItemButton
+                        onClick={() => {
+                          navigate(`/country/${country.name.common}`);
+                          setShowDropdown(false);
+                        }}
+                      >
+                        <ListItemAvatar>
+                          <Avatar
+                            src={country.flags.svg}
+                            alt={`${country.name.common} flag`}
+                            sx={{ width: 32, height: 24 }}
+                          />
+                        </ListItemAvatar>
+                        <ListItemText primary={country.name.common} />
+                      </ListItemButton>
+                    </ListItem>
+                  ))}
+                </List>
+              ) : (
+                searchTerm && (
+                  <Box sx={{ p: 2, textAlign: "center" }}>
+                    <Typography variant="body2" color="text.secondary">
+                      No countries found for "{searchTerm}"
+                    </Typography>
+                  </Box>
+                )
+              )}
             </Paper>
           )}
         </Box>
-
-        {searchTerm && filteredCountries.length === 0 && (
-          <Typography variant="body1" align="center" sx={{ mt: 2 }}>
-            No countries found for "{searchTerm}"
-          </Typography>
-        )}
       </Box>
     </Container>
   );
