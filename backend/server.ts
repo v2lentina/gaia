@@ -45,16 +45,23 @@ app.get("/", (req: Request, res: Response) => {
   res.json({ message: "Gaia Backend API is running!" });
 });
 
-// Get all countries
-app.get("/api/countries", async (req: Request, res: Response) => {
+// Get countries by extract
+app.get("/api/search", async (req: Request, res: Response) => {
+  const { q } = req.query; // Extract query from URL
+
+  if (!q || typeof q !== "string" || q.trim() === "") {
+    console.log("Invalid search query received:", q);
+    return res.json([]); // Empty results for empty queries
+  }
+
   try {
+    // REST Countries API Search
     const response = await axios.get(
-      "https://restcountries.com/v3.1/all?fields=name,flags,translations"
+      `https://restcountries.com/v3.1/name/${q}?fields=name,flags,translations`
     );
     res.json(response.data);
   } catch (error) {
-    console.error("Error fetching countries:", (error as Error).message);
-    res.status(500).json({ error: "Failed to fetch countries" });
+    res.json([]);
   }
 });
 

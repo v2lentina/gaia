@@ -20,43 +20,51 @@ import { useNavigate } from "react-router-dom";
 
 const HomePage = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [countries, setCountries] = useState([]);
-  const [filteredCountries, setFilteredCountries] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Debounced search for dropdown suggestions
   useEffect(() => {
-    const fetchCountries = async () => {
+    const searchCountries = async () => {
+      if (!searchTerm.trim()) {
+        // Validate search term and dont sent request if empty
+        setSearchResults([]);
+        setShowDropdown(false);
+        return;
+      }
+
+      setIsLoading(true);
       try {
-        const response = await axios.get("http://localhost:5000/api/countries");
-        setCountries(response.data);
+        const response = await axios.get(
+          `http://localhost:5000/api/search?q=${encodeURIComponent(searchTerm)}`
+        );
+        setSearchResults(response.data);
+        setShowDropdown(true);
       } catch (error) {
-        console.error("Error when fetching countries:", error);
+        console.error("Error searching countries:", error);
+        setSearchResults([]);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchCountries();
-  }, []);
+    const timer = setTimeout(searchCountries, 100); // Debounce
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // Event comes from an html input element
-    const term = event.target.value.toLowerCase();
-    setSearchTerm(term);
-    // Filter countries based on search term
-    const results = countries.filter((country: any) => {
-      // First check English name
-      if (country.name.common.toLowerCase().includes(term)) return true;
+  // Handle input change - triggers new search
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
 
-      // Then check all available translations dynamically
-      if (country.translations) {
-        return Object.values(country.translations).some((translation: any) =>
-          translation.common?.toLowerCase().includes(term)
-        );
-      }
-
-      return false;
-    });
-    setFilteredCountries(results);
+  // Handle Enter key press - navigate to search results page
+  const handleKeyPress = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter" && searchTerm.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
+      setShowDropdown(false);
+    }
   };
 
   //TXS
@@ -92,8 +100,9 @@ const HomePage = () => {
             variant="outlined"
             placeholder="Search for a country..."
             value={searchTerm}
-            onChange={handleSearch}
-            onFocus={() => setShowDropdown(true)}
+            onChange={handleInputChange}
+            onKeyPress={handleKeyPress}
+            onFocus={() => searchTerm && setShowDropdown(true)}
             onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
             InputProps={{
               startAdornment: (
@@ -117,9 +126,15 @@ const HomePage = () => {
                 overflow: "auto",
               }}
             >
-              {filteredCountries.length > 0 ? (
+              {isLoading ? (
+                <Box sx={{ p: 2, textAlign: "center" }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Searching...
+                  </Typography>
+                </Box>
+              ) : searchResults.length > 0 ? (
                 <List>
-                  {filteredCountries.slice(0, 10).map((country: any) => (
+                  {searchResults.slice(0, 10).map((country: any) => (
                     <ListItem key={country.name.common} disablePadding>
                       <ListItemButton
                         onClick={() => {
