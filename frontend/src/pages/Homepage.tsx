@@ -17,10 +17,11 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate } from "react-router-dom";
+import type { Country } from "../types/api"; // Import api types
 
 const HomePage = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState<Country[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -37,9 +38,11 @@ const HomePage = () => {
 
       setIsLoading(true);
       try {
-        const response = await axios.get(
+        const response = await axios.get<Country[]>(
           `http://localhost:5000/api/search?q=${encodeURIComponent(searchTerm)}`
         );
+
+        console.log("Frontend Country API data received:", response.data);
         setSearchResults(response.data);
         setShowDropdown(true);
       } catch (error) {
