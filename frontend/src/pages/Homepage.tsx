@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate } from "react-router-dom";
-import type { Country } from "../types/api"; // Import api types
+import type { Country, ApiResponse } from "../types/api"; // Import api types
 
 const HomePage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -30,7 +30,7 @@ const HomePage = () => {
   useEffect(() => {
     const searchCountries = async () => {
       if (!searchTerm.trim()) {
-        // Validate search term and dont sent request if empty
+        // Validate search term and dont send request if empty
         setSearchResults([]);
         setShowDropdown(false);
         return;
@@ -38,22 +38,27 @@ const HomePage = () => {
 
       setIsLoading(true);
       try {
-        const response = await axios.get<Country[]>(
+        const response = await axios.get<ApiResponse<Country[]>>(
           `http://localhost:5000/api/search?q=${encodeURIComponent(searchTerm)}`
         );
 
         console.log("Frontend Country API data received:", response.data);
-        setSearchResults(response.data);
-        setShowDropdown(true);
+
+        if (response.data.success) {
+          const countries = response.data.data;
+          setSearchResults(countries);
+          setShowDropdown(true);
+        }
       } catch (error) {
         console.error("Error searching countries:", error);
         setSearchResults([]);
+        setShowDropdown(false);
       } finally {
         setIsLoading(false);
       }
     };
 
-    const timer = setTimeout(searchCountries, 100); // Debounce
+    const timer = setTimeout(searchCountries, 300); // Debounce
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
