@@ -1,6 +1,5 @@
 // HomePage.tsx
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import {
   Container,
   Box,
@@ -15,9 +14,10 @@ import {
   Paper,
   Avatar,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
+import { SearchOutlined } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import type { Country, ApiResponse } from "../types/api"; // Import api types
+import type { Country } from "../types/api";
+import { searchCountries } from "../api/countries";
 
 const HomePage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -28,7 +28,7 @@ const HomePage = () => {
 
   // Debounced search for dropdown suggestions
   useEffect(() => {
-    const searchCountries = async () => {
+    const performSearch = async () => {
       if (!searchTerm.trim()) {
         // Validate search term and dont send request if empty
         setSearchResults([]);
@@ -38,27 +38,21 @@ const HomePage = () => {
 
       setIsLoading(true);
       try {
-        const response = await axios.get<ApiResponse<Country[]>>(
-          `http://localhost:5000/api/search?q=${encodeURIComponent(searchTerm)}`
-        );
+        // Use service function
+        const countries = await searchCountries(searchTerm);
 
-        console.log("Frontend Country API data received:", response.data);
-
-        if (response.data.success) {
-          const countries = response.data.data;
-          setSearchResults(countries);
-          setShowDropdown(true);
-        }
+        setSearchResults(countries);
+        setShowDropdown(true);
       } catch (error) {
         console.error("Error searching countries:", error);
         setSearchResults([]);
-        setShowDropdown(false);
+        setShowDropdown(true);
       } finally {
         setIsLoading(false);
       }
     };
 
-    const timer = setTimeout(searchCountries, 300); // Debounce
+    const timer = setTimeout(performSearch, 300); // Debounce
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
@@ -78,13 +72,19 @@ const HomePage = () => {
   //TXS
   return (
     <Container maxWidth="md">
-      <Box sx={{}}>
+      <Box
+        sx={{
+          minHeight: "60vh",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          textAlign: "center",
+        }}
+      >
         <Typography
           variant="h1"
-          component="h1"
-          gutterBottom
-          align="center"
-          sx={{ color: "primary.main", mb: 0 }}
+          sx={{ color: "primary.main", mb: 0, fontWeight: "500" }}
         >
           GAIA
         </Typography>
@@ -92,17 +92,17 @@ const HomePage = () => {
         <Typography
           variant="h6"
           component="p"
-          align="center"
           sx={{
             color: "text.secondary",
             mb: 2,
             fontWeight: "normal",
+            fontSize: "1rem",
           }}
         >
           Explore the world right from your desktop
         </Typography>
 
-        <Box sx={{ position: "relative", maxWidth: 600, mx: "auto" }}>
+        <Box sx={{ position: "relative", maxWidth: 600, width: "100%" }}>
           <TextField
             fullWidth
             variant="outlined"
@@ -115,11 +115,19 @@ const HomePage = () => {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon />
+                  <SearchOutlined />
                 </InputAdornment>
               ),
             }}
-            sx={{ width: "100%" }}
+            sx={{
+              width: "100%",
+              "& .MuiOutlinedInput-root": {
+                borderRadius: showDropdown ? "28px 28px 0 0" : "28px",
+                "&.Mui-focused fieldset": {
+                  borderColor: "primary.main",
+                },
+              },
+            }}
           />
 
           {showDropdown && (
@@ -132,6 +140,8 @@ const HomePage = () => {
                 zIndex: 1000,
                 maxHeight: 300,
                 overflow: "auto",
+                borderRadius: "0 0 24px 24px",
+                boxShadow: 3,
               }}
             >
               {isLoading ? (
@@ -146,7 +156,7 @@ const HomePage = () => {
                     <ListItem key={country.name.common} disablePadding>
                       <ListItemButton
                         onClick={() => {
-                          navigate(`/country/${country.name.common}`);
+                          navigate(`/country/${country.cca3}`);
                           setShowDropdown(false);
                         }}
                       >

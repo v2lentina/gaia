@@ -60,9 +60,19 @@ app.get(
     try {
       // REST Countries API Search
       const response = await axios.get<Country[]>(
-        `https://restcountries.com/v3.1/name/${q}?fields=name,flags,translations`
+        `https://restcountries.com/v3.1/name/${q}?fields=name,flags,cca3`
       );
-      sendSuccess(res, response.data);
+
+      // Filter for countries whose english name starts with the query (case insensitive)
+      const term = q.trim().toLowerCase();
+      const filtered = response.data.filter((country) => {
+        const englishName = country.name?.common?.toLowerCase() || "";
+        const officialName = country.name?.official?.toLowerCase() || "";
+
+        return englishName.startsWith(term);
+      });
+
+      sendSuccess(res, filtered);
     } catch (error) {
       console.error("External API error:", (error as Error).message);
 
