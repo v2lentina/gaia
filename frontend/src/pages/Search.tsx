@@ -13,6 +13,7 @@ import {
   CardActionArea,
   CircularProgress,
   Divider,
+  Tooltip,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -174,13 +175,21 @@ const Search = () => {
                     </Box>
 
                     <CardContent>
-                      <Typography
-                        variant="h6"
-                        component="h2"
-                        textAlign="center"
-                      >
-                        {country.name.common}
-                      </Typography>
+                      <Tooltip title={country.name.common} arrow>
+                        <Typography
+                          variant="h6"
+                          component="h2"
+                          sx={{
+                            textAlign: "center",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            width: "100%",
+                          }}
+                        >
+                          {country.name.common}
+                        </Typography>
+                      </Tooltip>
                     </CardContent>
                   </CardActionArea>
                 </Card>
