@@ -8,12 +8,11 @@ import {
   InputAdornment,
   Grid,
   Card,
-  CardMedia,
   CardContent,
   CardActionArea,
   CircularProgress,
-  Divider,
   Tooltip,
+  Pagination,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -28,6 +27,14 @@ const Search = () => {
   const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
   const [searchResults, setSearchResults] = useState<Country[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(12);
+
+  //Pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = searchResults.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(searchResults.length / itemsPerPage);
 
   // Search only on initial load if URL has query parameter
   useEffect(() => {
@@ -45,6 +52,8 @@ const Search = () => {
     }
 
     setIsLoading(true);
+    setCurrentPage(1);
+
     try {
       // Use service function instead of direct axios call
       const countries = await searchCountries(searchTerm);
@@ -125,7 +134,7 @@ const Search = () => {
 
         {!isLoading && searchResults.length > 0 && (
           <Grid container spacing={3}>
-            {searchResults.map((country) => (
+            {currentItems.map((country) => (
               <Grid
                 size={{ xs: 12, sm: 6, md: 4, lg: 3 }}
                 key={country.name.common}
@@ -196,6 +205,20 @@ const Search = () => {
               </Grid>
             ))}
           </Grid>
+        )}
+
+        {!isLoading && searchResults.length > itemsPerPage && (
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={(_, page) => setCurrentPage(page)}
+              color="primary"
+              size="large"
+              showFirstButton
+              showLastButton
+            />
+          </Box>
         )}
       </Box>
     </Container>
