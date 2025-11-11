@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import {
   Container,
   Box,
+  Button,
   Typography,
   TextField,
   InputAdornment,
@@ -15,6 +16,9 @@ import {
   Pagination,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import SortIcon from "@mui/icons-material/Sort";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import type { Country } from "../types/api";
 import { searchCountries } from "../api/countries";
@@ -29,11 +33,32 @@ const Search = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(12);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc" | "default">(
+    "default"
+  );
+
+  // Sort countries based on sortOrder
+  const sortCountries = (countries: Country[]) => {
+    if (sortOrder === "default") return countries;
+
+    // Create a copy of the countries array
+    return [...countries].sort((a, b) => {
+      const nameA = a.name.common.toLowerCase();
+      const nameB = b.name.common.toLowerCase();
+
+      if (sortOrder === "asc") {
+        return nameA.localeCompare(nameB);
+      } else {
+        return nameB.localeCompare(nameA);
+      }
+    });
+  };
 
   //Pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = searchResults.slice(indexOfFirstItem, indexOfLastItem);
+  const sortedResults = sortCountries(searchResults);
+  const currentItems = sortedResults.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(searchResults.length / itemsPerPage);
 
   // Search only on initial load if URL has query parameter
@@ -89,7 +114,15 @@ const Search = () => {
   return (
     <Container maxWidth="lg">
       <Box sx={{ py: 3, borderBottom: 1, borderColor: "divider" }}>
-        <form onSubmit={handleSearchSubmit}>
+        <Box
+          component="form"
+          onSubmit={handleSearchSubmit}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
           <TextField
             fullWidth
             variant="outlined"
@@ -110,7 +143,37 @@ const Search = () => {
               },
             }}
           />
-        </form>
+
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={
+              sortOrder === "asc" ? (
+                <ArrowUpwardIcon />
+              ) : sortOrder === "desc" ? (
+                <ArrowDownwardIcon />
+              ) : (
+                <SortIcon />
+              )
+            }
+            onClick={() => {
+              if (sortOrder === "default") setSortOrder("asc");
+              else if (sortOrder === "asc") setSortOrder("desc");
+              else setSortOrder("default");
+            }}
+            sx={{
+              textTransform: "none",
+              borderRadius: "20px",
+              px: 2,
+            }}
+          >
+            {sortOrder === "asc"
+              ? "A-Z"
+              : sortOrder === "desc"
+              ? "Z-A"
+              : "Sort"}
+          </Button>
+        </Box>
       </Box>
 
       <Box sx={{ py: 4 }}>
