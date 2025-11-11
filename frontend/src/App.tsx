@@ -8,6 +8,7 @@ import Homepage from "./pages/Homepage";
 import Search from "./pages/Search";
 import CountryDetails from "./pages/CountryDetails";
 import Header from "./components/Header";
+import WorldMap from "./pages/WorldMap";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/" element={<Homepage />} />
         <Route path="/search" element={<Search />} />
         <Route path="/country/:code" element={<CountryDetails />} />
+        <Route path="/map" element={<WorldMap />} />
       </Routes>
     </>
   );
