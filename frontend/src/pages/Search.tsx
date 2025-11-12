@@ -28,7 +28,7 @@ const Search = () => {
   const navigate = useNavigate();
 
   // State
-  const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("query") || "");
   const [searchResults, setSearchResults] = useState<Country[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -101,7 +101,7 @@ const Search = () => {
   const handleSearchSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     if (searchTerm.trim()) {
-      setSearchParams({ q: searchTerm.trim() });
+      setSearchParams({ query: searchTerm.trim() });
       performSearch();
     }
   };
@@ -213,7 +213,7 @@ const Search = () => {
                   }}
                 >
                   <CardActionArea
-                    onClick={() => handleCountryClick(country.name.common)}
+                    onClick={() => handleCountryClick(country.cca3)}
                     sx={{
                       height: "100%",
                       display: "flex",

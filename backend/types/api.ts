@@ -8,27 +8,41 @@ export interface Country {
     svg: string;
     png: string;
   };
-  translations?: Partial<
-    Record<
-      TranslationKey,
-      {
-        common: string;
-        official: string;
-      }
-    >
-  >;
+  cca3: string;
 }
 
-/*
-export interface CountryDetails extends Country {
-  region: string;
-  subregion: string;
-  population: number;
-  capital: string[];
-  languages: {
-    [key: string]: string; //enum
-  };
-}*/
+// REST Countries API
+export interface RestCountriesData extends Country {
+  capital?: string[];
+  population?: number;
+  area?: number;
+  region?: string;
+  subregion?: string;
+  languages?: { [key: string]: string };
+  currencies?: { [key: string]: { name: string; symbol?: string } };
+  timezones?: string[];
+  borders?: string[];
+  continents?: string[];
+  coatOfArms?: { svg?: string; png?: string };
+  landlocked?: boolean;
+  independent?: boolean;
+  unMember?: boolean;
+}
+
+// WikiData API
+export interface WikiDataFields {
+  religions?: string[];
+  ethnicGroups?: string[];
+  governmentType?: string;
+  hdi?: number;
+  gdpPerCapita?: number;
+  lifeExpectancy?: number;
+  literacyRate?: number;
+}
+
+export interface CountryDetails extends RestCountriesData {
+  wikiData?: WikiDataFields; // Optional in case API call fails
+}
 
 export interface ApiError {
   error: string;

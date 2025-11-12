@@ -64,7 +64,7 @@ const HomePage = () => {
   // Handle Enter key press - navigate to search results page
   const handleKeyPress = (event: React.KeyboardEvent) => {
     if (event.key === "Enter" && searchTerm.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
+      navigate(`/search?query=${encodeURIComponent(searchTerm.trim())}`);
       setShowDropdown(false);
     }
   };
