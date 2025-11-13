@@ -5,6 +5,7 @@ import {
   Country,
   RestCountriesData,
   WikiDataFields,
+  WikipediaImage,
   CountryDetails,
   ApiError,
   ApiResponse,
@@ -138,6 +139,7 @@ SELECT ?item ?itemLabel
        (GROUP_CONCAT(DISTINCT ?religionLabel; separator=", ") AS ?religions)
        (GROUP_CONCAT(DISTINCT ?ethnicLabel;  separator=", ") AS ?ethnicGroups)
        (SAMPLE(?govLabel) AS ?governmentType)
+       (SAMPLE(?enTitle) AS ?enwikiTitle)
 WHERE {
   ?item wdt:P298 "${cca3}".
   OPTIONAL { ?item wdt:P140 ?religion . ?religion rdfs:label ?religionLabel . FILTER(LANG(?religionLabel)="en") }
@@ -148,12 +150,52 @@ WHERE {
   OPTIONAL { ?item p:P2132/ps:P2132 ?gdpVal }
   OPTIONAL { ?item p:P2250/ps:P2250 ?lifeVal }
   OPTIONAL { ?item p:P6897/ps:P6897 ?litVal }
+  OPTIONAL {
+  ?enwiki schema:about ?item ;
+          schema:isPartOf <https://en.wikipedia.org/> ;
+          schema:name ?enTitle .
+}
 
   SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
 }
 GROUP BY ?item ?itemLabel
 LIMIT 1
 `.trim();
+
+// Fetch images from Wikipedia REST API
+async function fetchWikipediaImages(
+  wikipediaTitle: string
+): Promise<WikipediaImage[]> {
+  try {
+    const url = `https://api.wikimedia.org/core/v1/wikipedia/en/page/${encodeURIComponent(
+      wikipediaTitle
+    )}/links/media`;
+
+    const response = await axios.get(url, {
+      headers: {
+        "User-Agent": "GaiaApp/1.0 (https://example.com/contact)",
+        Accept: "application/json",
+      },
+      timeout: 8000,
+    });
+
+    const files = response.data?.files || [];
+
+    const imageFiles = files.filter(
+      (file: any) =>
+        file.preferred?.mediatype === "BITMAP" ||
+        file.preferred?.mediatype === "DRAWING"
+    );
+
+    return imageFiles;
+  } catch (error) {
+    console.warn(
+      `Failed to fetch Wikipedia images for "${wikipediaTitle}":`,
+      (error as Error).message
+    );
+    return []; // Return empty array if images fetch fails
+  }
+}
 
 async function fetchWikiDataByCCA3(cca3: string): Promise<WikiDataFields> {
   const query = buildWikiDataQueryStringByCCA3(cca3);
@@ -175,6 +217,14 @@ async function fetchWikiDataByCCA3(cca3: string): Promise<WikiDataFields> {
   const get = (k: string) => row[k]?.value as string | undefined;
   const parseNum = (k: string) => (get(k) ? Number(get(k)) : undefined);
 
+  const enwikiTitle = get("enwikiTitle");
+
+  // Fetch Wikipedia images if we have a title
+  let images: WikipediaImage[] = [];
+  if (enwikiTitle) {
+    images = await fetchWikipediaImages(enwikiTitle);
+  }
+
   return {
     religions: get("religions")?.split(", ").filter(Boolean),
     ethnicGroups: get("ethnicGroups")?.split(", ").filter(Boolean),
@@ -183,6 +233,8 @@ async function fetchWikiDataByCCA3(cca3: string): Promise<WikiDataFields> {
     gdpPerCapita: parseNum("gdpPerCapita"),
     lifeExpectancy: parseNum("lifeExpectancy"),
     literacyRate: parseNum("literacyRate"),
+    enwikiTitle,
+    images,
   };
 }
 

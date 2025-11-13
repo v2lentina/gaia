@@ -85,21 +85,76 @@ const CountryDetails = () => {
               <Typography variant="h6" gutterBottom>
                 Country Images
               </Typography>
-              <Box
-                sx={{
-                  height: "200px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  border: "2px dashed #ccc",
-                  borderRadius: 1,
-                  backgroundColor: "#f9f9f9",
-                }}
-              >
-                <Typography color="text.secondary">
-                  🏞️ Country image placeholder
-                </Typography>
-              </Box>
+              {country.wikiData?.images &&
+              country.wikiData.images.length > 0 ? (
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 2,
+                    maxHeight: "500px",
+                    overflowY: "auto",
+                  }}
+                >
+                  {country.wikiData.images
+                    .filter((img) => {
+                      const title = img.title.toLowerCase();
+                      const mediatype = img.preferred?.mediatype;
+
+                      // Only show real photographs (BITMAP), not icons/logos
+                      return (
+                        mediatype === "BITMAP" &&
+                        !title.includes("logo") &&
+                        !title.includes("icon") &&
+                        !title.includes("commons") &&
+                        !title.includes("cscr-featured") &&
+                        !title.includes("oojs") &&
+                        !title.includes("semi-protection") &&
+                        !title.includes("wiktionary") &&
+                        (img.preferred?.width || 0) > 200
+                      ); // Bigger images only
+                    })
+                    .slice(0, 8) // Show max 8 real photos
+                    .map((image, index) => (
+                      <Box key={index} sx={{ mb: 2 }}>
+                        <img
+                          src={`https:${image.preferred?.url}`}
+                          alt={image.title}
+                          style={{
+                            width: "100%",
+                            maxHeight: "200px",
+                            objectFit: "cover",
+                            borderRadius: "8px",
+                            border: "1px solid #ddd",
+                          }}
+                        />
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ mt: 0.5, display: "block" }}
+                        >
+                          {image.title}
+                        </Typography>
+                      </Box>
+                    ))}
+                </Box>
+              ) : (
+                <Box
+                  sx={{
+                    height: "200px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    border: "2px dashed #ccc",
+                    borderRadius: 1,
+                    backgroundColor: "#f9f9f9",
+                  }}
+                >
+                  <Typography color="text.secondary">
+                    🏞️ No images available
+                  </Typography>
+                </Box>
+              )}
             </CardContent>
           </Card>
         </Box>

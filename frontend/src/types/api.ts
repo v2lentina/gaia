@@ -30,6 +30,25 @@ export interface RestCountriesData extends Country {
 }
 
 // WikiData API
+export interface WikipediaImage {
+  title: string;
+  file_description_url: string;
+  preferred: {
+    mediatype: string;
+    size?: number;
+    width: number;
+    height: number;
+    url: string;
+  };
+  original: {
+    mediatype: string;
+    size?: number;
+    width: number;
+    height: number;
+    url: string;
+  };
+}
+
 export interface WikiDataFields {
   religions?: string[];
   ethnicGroups?: string[];
@@ -38,6 +57,8 @@ export interface WikiDataFields {
   gdpPerCapita?: number;
   lifeExpectancy?: number;
   literacyRate?: number;
+  enwikiTitle?: string;
+  images?: WikipediaImage[]; // Neue Wikipedia Images
 }
 
 export interface CountryDetails extends RestCountriesData {
