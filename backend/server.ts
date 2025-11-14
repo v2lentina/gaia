@@ -128,37 +128,51 @@ app.get(
   }
 );
 
-// WikiData SPARQL Helper Functions
-const buildWikiDataQueryStringByCCA3 = (cca3: string) =>
+// WikiData SPARQL Helper Functions - Split into fast and slow queries
+// Fast Query: Numeric data + government + wikipedia title
+const buildFastWikiDataQuery = (cca3: string) =>
   `
 SELECT ?item ?itemLabel
        (SAMPLE(?hdiVal) AS ?hdi)
        (SAMPLE(?gdpVal) AS ?gdpPerCapita)
        (SAMPLE(?lifeVal) AS ?lifeExpectancy)
        (SAMPLE(?litVal) AS ?literacyRate)
-       (GROUP_CONCAT(DISTINCT ?religionLabel; separator=", ") AS ?religions)
-       (GROUP_CONCAT(DISTINCT ?ethnicLabel;  separator=", ") AS ?ethnicGroups)
        (SAMPLE(?govLabel) AS ?governmentType)
        (SAMPLE(?enTitle) AS ?enwikiTitle)
 WHERE {
   ?item wdt:P298 "${cca3}".
-  OPTIONAL { ?item wdt:P140 ?religion . ?religion rdfs:label ?religionLabel . FILTER(LANG(?religionLabel)="en") }
-  OPTIONAL { ?item wdt:P172 ?ethnic .   ?ethnic   rdfs:label ?ethnicLabel .  FILTER(LANG(?ethnicLabel)="en") }
-  OPTIONAL { ?item wdt:P122 ?gov .      ?gov      rdfs:label ?govLabel .     FILTER(LANG(?govLabel)="en") }
-
+  OPTIONAL { ?item wdt:P122 ?gov . ?gov rdfs:label ?govLabel . FILTER(LANG(?govLabel)="en") }
+  
   OPTIONAL { ?item p:P1081/ps:P1081 ?hdiVal }
   OPTIONAL { ?item p:P2132/ps:P2132 ?gdpVal }
   OPTIONAL { ?item p:P2250/ps:P2250 ?lifeVal }
   OPTIONAL { ?item p:P6897/ps:P6897 ?litVal }
   OPTIONAL {
-  ?enwiki schema:about ?item ;
-          schema:isPartOf <https://en.wikipedia.org/> ;
-          schema:name ?enTitle .
-}
+    ?enwiki schema:about ?item ;
+            schema:isPartOf <https://en.wikipedia.org/> ;
+            schema:name ?enTitle .
+  }
 
   SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
 }
 GROUP BY ?item ?itemLabel
+LIMIT 1
+`.trim();
+
+// Slow Query: Cultural data (religions & ethnic groups)
+const buildSlowWikiDataQuery = (cca3: string) =>
+  `
+SELECT ?item
+       (GROUP_CONCAT(DISTINCT ?religionLabel; separator=", ") AS ?religions)
+       (GROUP_CONCAT(DISTINCT ?ethnicLabel; separator=", ") AS ?ethnicGroups)
+WHERE {
+  ?item wdt:P298 "${cca3}".
+  OPTIONAL { ?item wdt:P140 ?religion . ?religion rdfs:label ?religionLabel . FILTER(LANG(?religionLabel)="en") }
+  OPTIONAL { ?item wdt:P172 ?ethnic . ?ethnic rdfs:label ?ethnicLabel . FILTER(LANG(?ethnicLabel)="en") }
+
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}
+GROUP BY ?item
 LIMIT 1
 `.trim();
 
@@ -198,44 +212,98 @@ async function fetchWikipediaImages(
 }
 
 async function fetchWikiDataByCCA3(cca3: string): Promise<WikiDataFields> {
-  const query = buildWikiDataQueryStringByCCA3(cca3);
   const url = "https://query.wikidata.org/sparql";
-  const resp = await axios.get(url, {
-    params: { query, format: "json" },
-    headers: {
-      "User-Agent": "GaiaApp/1.0 (https://example.com/contact)",
-      Accept: "application/sparql-results+json",
-    },
-    timeout: 10000,
-  });
-
-  // If no results, return empty object
-  const row = resp.data?.results?.bindings?.[0];
-  if (!row) return {};
-
-  // Helper to extract values
-  const get = (k: string) => row[k]?.value as string | undefined;
-  const parseNum = (k: string) => (get(k) ? Number(get(k)) : undefined);
-
-  const enwikiTitle = get("enwikiTitle");
-
-  // Fetch Wikipedia images if we have a title
-  let images: WikipediaImage[] = [];
-  if (enwikiTitle) {
-    images = await fetchWikipediaImages(enwikiTitle);
-  }
-
-  return {
-    religions: get("religions")?.split(", ").filter(Boolean),
-    ethnicGroups: get("ethnicGroups")?.split(", ").filter(Boolean),
-    governmentType: get("governmentType"),
-    hdi: parseNum("hdi"),
-    gdpPerCapita: parseNum("gdpPerCapita"),
-    lifeExpectancy: parseNum("lifeExpectancy"),
-    literacyRate: parseNum("literacyRate"),
-    enwikiTitle,
-    images,
+  const headers = {
+    "User-Agent": "GaiaApp/1.0 (https://example.com/contact)",
+    Accept: "application/sparql-results+json",
   };
+
+  try {
+    // Execute both queries in parallel
+    const [fastResult, slowResult] = await Promise.allSettled([
+      // Fast Query: Numeric data + government + wikipedia title
+      axios.get(url, {
+        params: { query: buildFastWikiDataQuery(cca3), format: "json" },
+        headers,
+        timeout: 8000, // Shorter timeout for fast query
+      }),
+
+      // Slow Query: Cultural data (religions & ethnic groups)
+      axios.get(url, {
+        params: { query: buildSlowWikiDataQuery(cca3), format: "json" },
+        headers,
+        timeout: 15000, // Longer timeout for slow query
+      }),
+    ]);
+
+    // Process fast query results (required data)
+    let fastData: any = {};
+    if (fastResult.status === "fulfilled") {
+      const fastRow = fastResult.value.data?.results?.bindings?.[0];
+      if (fastRow) {
+        const get = (k: string) => fastRow[k]?.value as string | undefined;
+        const parseNum = (k: string) => (get(k) ? Number(get(k)) : undefined);
+
+        fastData = {
+          governmentType: get("governmentType"),
+          hdi: parseNum("hdi"),
+          gdpPerCapita: parseNum("gdpPerCapita"),
+          lifeExpectancy: parseNum("lifeExpectancy"),
+          literacyRate: parseNum("literacyRate"),
+          enwikiTitle: get("enwikiTitle"),
+        };
+      }
+    } else {
+      console.warn("Fast WikiData query failed:", fastResult.reason?.message);
+    }
+
+    // Process slow query results (optional data)
+    let slowData: any = {};
+    if (slowResult.status === "fulfilled") {
+      const slowRow = slowResult.value.data?.results?.bindings?.[0];
+      if (slowRow) {
+        const get = (k: string) => slowRow[k]?.value as string | undefined;
+
+        slowData = {
+          religions: get("religions")?.split(", ").filter(Boolean),
+          ethnicGroups: get("ethnicGroups")?.split(", ").filter(Boolean),
+        };
+      }
+    } else {
+      console.warn(
+        "Slow WikiData query failed (acceptable):",
+        slowResult.reason?.message
+      );
+    }
+
+    // Fetch Wikipedia images if we have a title
+    let images: WikipediaImage[] = [];
+    if (fastData.enwikiTitle) {
+      try {
+        images = await fetchWikipediaImages(fastData.enwikiTitle);
+      } catch (imageError) {
+        console.warn(
+          "Wikipedia images fetch failed:",
+          (imageError as Error).message
+        );
+      }
+    }
+
+    // Combine all data
+    const result = {
+      ...fastData,
+      ...slowData,
+      images,
+    };
+
+    return result;
+  } catch (error) {
+    console.error(
+      "WikiData fetch failed completely:",
+      (error as Error).message
+    );
+    return {}; // Return empty object if everything fails
+  }
 }
 
 // Get REST Countries data by CCA3
