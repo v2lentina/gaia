@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import { ArrowBack, ArrowForward } from "@mui/icons-material";
 import { useParams } from "react-router-dom";
-import { getCountryByCode } from "../api/countries";
+import { getBasicCountryData, getWikiDataByCode } from "../api/countries";
 import type { CountryDetails } from "../types/api";
 
 const CountryDetails = () => {
@@ -22,26 +22,50 @@ const CountryDetails = () => {
   const [country, setCountry] = useState<CountryDetails | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [wikiDataLoading, setWikiDataLoading] = useState(false);
 
   useEffect(() => {
-    const loadCountry = async () => {
+    const loadCountryData = async () => {
       if (!code) return;
 
       setLoading(true);
-      setCurrentImageIndex(0); // Reset image index when loading new country
+      setWikiDataLoading(false);
+      setCurrentImageIndex(0);
 
       try {
-        const countryData = await getCountryByCode(code.toUpperCase());
-        setCountry(countryData);
+        const basicData = await getBasicCountryData(code.toUpperCase());
+
+        setCountry({
+          ...basicData,
+          wikiData: undefined,
+        });
+        setLoading(false);
+
+        setWikiDataLoading(true);
+        try {
+          const wikiData = await getWikiDataByCode(code.toUpperCase());
+
+          setCountry((prev: CountryDetails | null) =>
+            prev
+              ? {
+                  ...prev,
+                  wikiData,
+                }
+              : null
+          );
+        } catch (wikiError) {
+          console.warn("WikiData loading failed:", wikiError);
+        } finally {
+          setWikiDataLoading(false);
+        }
       } catch (error) {
-        console.error("Error loading country:", error);
-      } finally {
+        console.error("Error loading basic country data:", error);
         setLoading(false);
       }
     };
 
-    loadCountry();
-  }, [code]); // Dependency array - execute when 'code' changes
+    loadCountryData();
+  }, [code]);
 
   if (loading) {
     return (
@@ -152,6 +176,15 @@ const CountryDetails = () => {
               <Typography variant="body1" sx={{ mb: 3 }}>
                 <strong>unMember:</strong> {country.unMember ? "Yes" : "No"}
               </Typography>
+
+              {wikiDataLoading && (
+                <Box sx={{ mb: 3, textAlign: "center" }}>
+                  <CircularProgress size={24} />
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    Loading additional information...
+                  </Typography>
+                </Box>
+              )}
 
               {country.wikiData &&
                 ((country.wikiData.religions &&
@@ -382,7 +415,16 @@ const CountryDetails = () => {
               fontSize: "18px",
             }}
           >
-            No images available
+            {wikiDataLoading ? (
+              <Box sx={{ textAlign: "center" }}>
+                <CircularProgress sx={{ color: "white", mb: 2 }} />
+                <Typography variant="h6" sx={{ color: "white" }}>
+                  Loading images...
+                </Typography>
+              </Box>
+            ) : (
+              "No images available"
+            )}
           </Box>
         )}
       </Box>

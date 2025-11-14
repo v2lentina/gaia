@@ -294,24 +294,37 @@ app.get(
     }
 
     try {
-      // Fetch REST Countries data
-      const restCountriesData = await fetchRestDataByCCA3(code);
+      const startTime = Date.now();
 
-      // Fetch WikiData (non-blocking, continue even if it fails)
+      // Fetch REST Countries and WikiData in PARALLEL
+      const [restCountriesData, wikiDataResult] = await Promise.allSettled([
+        fetchRestDataByCCA3(code),
+        fetchWikiDataByCCA3(code),
+      ]);
+
+      const fetchTime = Date.now() - startTime;
+      console.log(`Parallel API calls completed in ${fetchTime}ms`);
+
+      // Handle REST Countries result (required)
+      if (restCountriesData.status === "rejected") {
+        throw restCountriesData.reason;
+      }
+
+      // Handle WikiData result (optional)
       let wikiData: WikiDataFields | undefined;
-      try {
-        wikiData = await fetchWikiDataByCCA3(code);
-      } catch (error) {
+      if (wikiDataResult.status === "fulfilled") {
+        wikiData = wikiDataResult.value;
+      } else {
         console.warn(
           "WikiData fetch failed in combined endpoint:",
-          (error as Error).message
+          wikiDataResult.reason?.message
         );
-        // Continue without WikiData
+        wikiData = undefined;
       }
 
       // Combine the data
       const countryDetails: CountryDetails = {
-        ...restCountriesData,
+        ...restCountriesData.value,
         wikiData,
       };
 

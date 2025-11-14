@@ -92,6 +92,44 @@ export const getWikiData = async (code: string): Promise<WikiDataFields> => {
 };
 
 /**
+ * Get basic country details
+ * @param code - 3-letter country code (e.g., "DEU", "USA")
+ * @returns Promise<RestCountriesData> - Basic country info
+ */
+export const getBasicCountryData = async (
+  code: string
+): Promise<RestCountriesData> => {
+  if (!code.trim()) {
+    throw new Error("Invalid country code");
+  }
+
+  const response = await api.get<ApiResponse<RestCountriesData>>(
+    `/countries/${encodeURIComponent(code)}/rest`
+  );
+
+  return handleApiResponse(response);
+};
+
+/**
+ * Get WikiData for a country
+ * @param code - 3-letter country code (e.g., "DEU", "USA")
+ * @returns Promise<WikiDataFields> - WikiData information
+ */
+export const getWikiDataByCode = async (
+  code: string
+): Promise<WikiDataFields> => {
+  if (!code.trim()) {
+    throw new Error("Invalid country code");
+  }
+
+  const response = await api.get<ApiResponse<WikiDataFields>>(
+    `/countries/${encodeURIComponent(code)}/wiki`
+  );
+
+  return handleApiResponse(response);
+};
+
+/**
  * Get complete country details (combined data)
  * @param code - 3-letter country code (e.g., "DEU", "USA")
  * @returns Promise<CountryDetails> - Complete country details
