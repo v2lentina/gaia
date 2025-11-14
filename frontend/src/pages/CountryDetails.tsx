@@ -10,14 +10,17 @@ import {
   CircularProgress,
   Alert,
   Stack,
+  IconButton,
 } from "@mui/material";
+import { ArrowBack, ArrowForward } from "@mui/icons-material";
 import { useParams } from "react-router-dom";
 import { getCountryByCode } from "../api/countries";
 import type { CountryDetails } from "../types/api";
 
 const CountryDetails = () => {
   const { code } = useParams<{ code: string }>();
-  const [country, setCountry] = useState<CountryDetails | null>(null); // or undefined? or sth
+  const [country, setCountry] = useState<CountryDetails | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,6 +28,7 @@ const CountryDetails = () => {
       if (!code) return;
 
       setLoading(true);
+      setCurrentImageIndex(0); // Reset image index when loading new country
 
       try {
         const countryData = await getCountryByCode(code.toUpperCase());
@@ -37,7 +41,7 @@ const CountryDetails = () => {
     };
 
     loadCountry();
-  }, [code]); // ependency array - execute when 'code' changes
+  }, [code]); // Dependency array - execute when 'code' changes
 
   if (loading) {
     return (
@@ -59,286 +63,330 @@ const CountryDetails = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4, px: { xs: 1, sm: 2 } }}>
+    <Box sx={{ height: "100vh", display: "flex", overflow: "hidden" }}>
       <Box
         sx={{
-          display: "flex",
-          gap: 3,
-          justifyContent: "center",
-          alignItems: "flex-start",
-          minWidth: "600px",
+          flex: "0 0 50%",
+          overflowY: "auto",
+          height: "100vh",
+          px: 3,
+          py: 4,
         }}
       >
-        {/* Left Side: Images */}
-        <Box
-          sx={{
-            flex: "0 0 50%",
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-            maxWidth: 600,
-            mx: "auto",
-          }}
-        >
-          <Card sx={{ height: "fit-content" }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Country Images
-              </Typography>
-              {country.wikiData?.images &&
-              country.wikiData.images.length > 0 ? (
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 2,
-                    maxHeight: "500px",
-                    overflowY: "auto",
-                  }}
-                >
-                  {country.wikiData.images
-                    .filter((img) => {
-                      const title = img.title.toLowerCase();
-                      const mediatype = img.preferred?.mediatype;
-
-                      // Only show real photographs (BITMAP), not icons/logos
-                      return (
-                        mediatype === "BITMAP" &&
-                        !title.includes("logo") &&
-                        !title.includes("icon") &&
-                        !title.includes("commons") &&
-                        !title.includes("cscr-featured") &&
-                        !title.includes("oojs") &&
-                        !title.includes("semi-protection") &&
-                        !title.includes("wiktionary") &&
-                        (img.preferred?.width || 0) > 200
-                      ); // Bigger images only
-                    })
-                    .slice(0, 8) // Show max 8 real photos
-                    .map((image, index) => (
-                      <Box key={index} sx={{ mb: 2 }}>
-                        <img
-                          src={`https:${image.preferred?.url}`}
-                          alt={image.title}
-                          style={{
-                            width: "100%",
-                            maxHeight: "200px",
-                            objectFit: "cover",
-                            borderRadius: "8px",
-                            border: "1px solid #ddd",
-                          }}
-                        />
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{ mt: 0.5, display: "block" }}
-                        >
-                          {image.title}
-                        </Typography>
-                      </Box>
-                    ))}
-                </Box>
-              ) : (
-                <Box
-                  sx={{
-                    height: "200px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    border: "2px dashed #ccc",
-                    borderRadius: 1,
-                    backgroundColor: "#f9f9f9",
-                  }}
-                >
-                  <Typography color="text.secondary">
-                    🏞️ No images available
-                  </Typography>
-                </Box>
-              )}
-            </CardContent>
-          </Card>
-        </Box>
-
-        {/* Right Side: Details */}
-        <Box
-          sx={{
-            flex: "0 0 50%",
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-            maxWidth: 600,
-          }}
-        >
-          <Card>
-            <CardContent sx={{ padding: 2 }}>
-              <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
+        <Box sx={{ maxWidth: 600, mx: "auto" }}>
+          <Card sx={{ boxShadow: 0 }}>
+            <CardContent sx={{ padding: 3 }}>
+              <Typography variant="h4" gutterBottom sx={{ mb: 3 }}>
                 {country.name.common} ({country.cca3})
               </Typography>
-              <Box sx={{ mb: 2 }}>
+              <Box sx={{ mb: 3 }}>
                 <img
                   src={country.flags.svg}
                   alt={`Flag of ${country.name.common}`}
-                  style={{ width: "80px", marginBottom: "8px" }}
+                  style={{
+                    width: "180px",
+                    marginBottom: "16px",
+                    border: "1px solid #ccc",
+                  }}
                 />
               </Box>
-              <Typography variant="body2" sx={{ mb: 0.5 }}>
+              <Typography variant="h6" sx={{ mb: 2, color: "primary.main" }}>
+                Basic Information
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 1 }}>
                 <strong>Official Name:</strong> {country.name.official}
               </Typography>
-              <Typography variant="body2" sx={{ mb: 0.5 }}>
+              <Typography variant="body1" sx={{ mb: 1 }}>
                 <strong>Capital:</strong> {country.capital?.join(", ") || "N/A"}
               </Typography>
-              <Typography variant="body2" sx={{ mb: 0.5 }}>
+              <Typography variant="body1" sx={{ mb: 1 }}>
                 <strong>Region:</strong> {country.region || "N/A"}
               </Typography>
-              <Typography variant="body2" sx={{ mb: 0.5 }}>
+              <Typography variant="body1" sx={{ mb: 1 }}>
                 <strong>Subregion:</strong> {country.subregion || "N/A"}
               </Typography>
-              <Typography variant="body2" sx={{ mb: 0.5 }}>
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                <strong>Borders:</strong> {country.borders?.join(", ") || "N/A"}
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                <strong>Continent:</strong>{" "}
+                {country.continents?.join(", ") || "N/A"}
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                <strong>Landlocked:</strong> {country.landlocked ? "Yes" : "No"}
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 1 }}>
                 <strong>Population:</strong>{" "}
                 {country.population?.toLocaleString() || "N/A"}
               </Typography>
-              <Typography variant="body2" sx={{ mb: 0.5 }}>
+              <Typography variant="body1" sx={{ mb: 3 }}>
                 <strong>Area:</strong> {country.area?.toLocaleString() || "N/A"}{" "}
                 km²
               </Typography>
-              <Typography variant="body2" sx={{ mb: 0.5 }}>
+
+              <Typography variant="h6" sx={{ mb: 2, color: "primary.main" }}>
+                Languages & Culture
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 1 }}>
                 <strong>Languages:</strong>{" "}
                 {country.languages
                   ? Object.values(country.languages).join(", ")
                   : "N/A"}
               </Typography>
-              <Typography variant="body2" sx={{ mb: 0.5 }}>
+              <Typography variant="body1" sx={{ mb: 1 }}>
                 <strong>Currencies:</strong>{" "}
                 {country.currencies
-                  ? Object.values(country.currencies)
-                      .map((curr) =>
-                        curr.symbol
-                          ? `${curr.name} (${curr.symbol})`
-                          : curr.name
-                      )
+                  ? Object.entries(country.currencies)
+                      .map(([code, currency]) => `${currency.name} (${code})`)
                       .join(", ")
                   : "N/A"}
               </Typography>
-              <Typography variant="body2" sx={{ mb: 0.5 }}>
+              <Typography variant="body1" sx={{ mb: 1 }}>
                 <strong>Timezones:</strong>{" "}
                 {country.timezones?.join(", ") || "N/A"}
               </Typography>
-              <Typography variant="body2" sx={{ mb: 0.5 }}>
-                <strong>Continents:</strong>{" "}
-                {country.continents?.join(", ") || "N/A"}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 0.5 }}>
-                <strong>Landlocked:</strong> {country.landlocked ? "Yes" : "No"}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 0.5 }}>
-                <strong>Borders:</strong>{" "}
-                {country.borders?.length ? country.borders.join(", ") : "None"}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 0.5 }}>
-                <strong>Independent:</strong>{" "}
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                <strong>independent:</strong>{" "}
                 {country.independent ? "Yes" : "No"}
               </Typography>
-              <Typography variant="body2" sx={{ mb: 0.5 }}>
-                <strong>UN Member:</strong> {country.unMember ? "Yes" : "No"}
+              <Typography variant="body1" sx={{ mb: 3 }}>
+                <strong>unMember:</strong> {country.unMember ? "Yes" : "No"}
               </Typography>
-              <Typography variant="body2" sx={{ mb: 0.5 }}>
-                <strong>Coat of Arms:</strong>{" "}
-                {country.coatOfArms?.svg ? (
-                  <img
-                    src={country.coatOfArms.svg}
-                    alt={`Coat of Arms of ${country.name.common}`}
-                    style={{ width: "80px", marginBottom: "8px" }}
-                  />
-                ) : (
-                  "N/A"
+
+              {country.wikiData &&
+                ((country.wikiData.religions &&
+                  country.wikiData.religions.length > 0) ||
+                  (country.wikiData.ethnicGroups &&
+                    country.wikiData.ethnicGroups.length > 0) ||
+                  (country.wikiData.governmentType &&
+                    country.wikiData.governmentType.trim().length > 0) ||
+                  country.wikiData.hdi ||
+                  country.wikiData.gdpPerCapita ||
+                  country.wikiData.lifeExpectancy ||
+                  country.wikiData.literacyRate) && (
+                  <>
+                    <Typography
+                      variant="h6"
+                      sx={{ mb: 2, color: "primary.main" }}
+                    >
+                      Additional Information
+                    </Typography>
+                    {country.wikiData.religions &&
+                      country.wikiData.religions.length > 0 && (
+                        <Typography variant="body1" sx={{ mb: 1 }}>
+                          <strong>Religions:</strong>{" "}
+                          {country.wikiData.religions.join(", ")}
+                        </Typography>
+                      )}
+                    {country.wikiData.ethnicGroups &&
+                      country.wikiData.ethnicGroups.length > 0 && (
+                        <Typography variant="body1" sx={{ mb: 1 }}>
+                          <strong>Ethnic Groups:</strong>{" "}
+                          {country.wikiData.ethnicGroups.join(", ")}
+                        </Typography>
+                      )}
+                    {country.wikiData.governmentType &&
+                      country.wikiData.governmentType.trim().length > 0 && (
+                        <Typography variant="body1" sx={{ mb: 1 }}>
+                          <strong>Government:</strong>{" "}
+                          {country.wikiData.governmentType}
+                        </Typography>
+                      )}
+                    {country.wikiData.hdi && (
+                      <Typography variant="body1" sx={{ mb: 1 }}>
+                        <strong>HDI:</strong> {country.wikiData.hdi.toFixed(3)}
+                      </Typography>
+                    )}
+                    {country.wikiData.gdpPerCapita && (
+                      <Typography variant="body1" sx={{ mb: 1 }}>
+                        <strong>GDP per Capita:</strong> $
+                        {country.wikiData.gdpPerCapita.toLocaleString()}
+                      </Typography>
+                    )}
+                    {country.wikiData.lifeExpectancy && (
+                      <Typography variant="body1" sx={{ mb: 1 }}>
+                        <strong>Life Expectancy:</strong>{" "}
+                        {country.wikiData.lifeExpectancy.toFixed(1)} years
+                      </Typography>
+                    )}
+                    {country.wikiData.literacyRate && (
+                      <Typography variant="body1" sx={{ mb: 1 }}>
+                        <strong>Literacy Rate:</strong>{" "}
+                        {country.wikiData.literacyRate.toFixed(1)}%
+                      </Typography>
+                    )}
+                  </>
                 )}
-              </Typography>
-            </CardContent>
-          </Card>
-
-          {/* WikiData Card */}
-          {country.wikiData && (
-            <Card>
-              <CardContent sx={{ padding: 2 }}>
-                <Typography variant="h6" gutterBottom sx={{ mb: 1.5 }}>
-                  WikiData Information
-                </Typography>
-
-                {country.wikiData.religions && (
-                  <Typography sx={{ mb: 1 }}>
-                    <strong>Religions:</strong>{" "}
-                    {country.wikiData.religions.join(", ")}
-                  </Typography>
-                )}
-
-                {country.wikiData.ethnicGroups && (
-                  <Typography sx={{ mb: 1 }}>
-                    <strong>Ethnic Groups:</strong>{" "}
-                    {country.wikiData.ethnicGroups.join(", ")}
-                  </Typography>
-                )}
-
-                {country.wikiData.governmentType && (
-                  <Typography sx={{ mb: 1 }}>
-                    <strong>Government Type:</strong>{" "}
-                    {country.wikiData.governmentType}
-                  </Typography>
-                )}
-
-                {country.wikiData.hdi && (
-                  <Typography sx={{ mb: 1 }}>
-                    <strong>HDI:</strong> {country.wikiData.hdi}
-                  </Typography>
-                )}
-
-                {country.wikiData.gdpPerCapita && (
-                  <Typography sx={{ mb: 1 }}>
-                    <strong>GDP per Capita:</strong> $
-                    {country.wikiData.gdpPerCapita.toLocaleString()}
-                  </Typography>
-                )}
-
-                {country.wikiData.lifeExpectancy && (
-                  <Typography sx={{ mb: 1 }}>
-                    <strong>Life Expectancy:</strong>{" "}
-                    {country.wikiData.lifeExpectancy} years
-                  </Typography>
-                )}
-
-                {country.wikiData.literacyRate && (
-                  <Typography sx={{ mb: 1 }}>
-                    <strong>Literacy Rate:</strong>{" "}
-                    {country.wikiData.literacyRate}%
-                  </Typography>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Debug Info */}
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Debug Info (Raw Data)
-              </Typography>
-              <Box
-                component="pre"
-                sx={{
-                  backgroundColor: "#f5f5f5",
-                  p: 2,
-                  borderRadius: 1,
-                  overflow: "auto",
-                  maxHeight: "300px",
-                  fontSize: "0.8rem",
-                }}
-              >
-                {JSON.stringify(country, null, 2)}
-              </Box>
             </CardContent>
           </Card>
         </Box>
       </Box>
-    </Container>
+
+      <Box
+        sx={{
+          flex: "0 0 50%",
+          height: "100vh",
+          position: "relative",
+          backgroundColor: "#000",
+        }}
+      >
+        {country.wikiData?.images && country.wikiData.images.length > 0 ? (
+          <Box
+            sx={{
+              width: "100%",
+              height: "100%",
+              position: "relative",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {(() => {
+              // Filter images once
+              const filteredImages = country.wikiData.images.filter((img) => {
+                const title = img.title.toLowerCase();
+                const mediatype = img.preferred?.mediatype;
+
+                return (
+                  mediatype === "BITMAP" &&
+                  !title.includes("logo") &&
+                  !title.includes("icon") &&
+                  !title.includes("commons") &&
+                  !title.includes("cscr-featured") &&
+                  !title.includes("oojs") &&
+                  !title.includes("semi-protection") &&
+                  !title.includes("wiktionary") &&
+                  (img.preferred?.width || 0) > 200
+                );
+              });
+
+              if (filteredImages.length === 0) {
+                return (
+                  <Box sx={{ color: "white", fontSize: "18px" }}>
+                    No images available
+                  </Box>
+                );
+              }
+
+              const currentImage =
+                filteredImages[currentImageIndex] || filteredImages[0];
+
+              return (
+                <>
+                  <img
+                    src={`https:${currentImage.preferred?.url}`}
+                    alt={currentImage.title}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      objectPosition: "center",
+                    }}
+                  />
+
+                  {filteredImages.length > 1 && (
+                    <>
+                      <IconButton
+                        onClick={() =>
+                          setCurrentImageIndex(
+                            currentImageIndex === 0
+                              ? filteredImages.length - 1
+                              : currentImageIndex - 1
+                          )
+                        }
+                        sx={{
+                          position: "absolute",
+                          left: 20,
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          backgroundColor: "rgba(0,0,0,0.6)",
+                          color: "white",
+                          "&:hover": {
+                            backgroundColor: "rgba(0,0,0,0.8)",
+                          },
+                        }}
+                      >
+                        <ArrowBack />
+                      </IconButton>
+
+                      <IconButton
+                        onClick={() =>
+                          setCurrentImageIndex(
+                            currentImageIndex === filteredImages.length - 1
+                              ? 0
+                              : currentImageIndex + 1
+                          )
+                        }
+                        sx={{
+                          position: "absolute",
+                          right: 20,
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          backgroundColor: "rgba(0,0,0,0.6)",
+                          color: "white",
+                          "&:hover": {
+                            backgroundColor: "rgba(0,0,0,0.8)",
+                          },
+                        }}
+                      >
+                        <ArrowForward />
+                      </IconButton>
+                    </>
+                  )}
+
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      bottom: 20,
+                      right: 20,
+                      backgroundColor: "rgba(0,0,0,0.7)",
+                      color: "white",
+                      px: 2,
+                      py: 1,
+                      borderRadius: 1,
+                      fontSize: "14px",
+                    }}
+                  >
+                    {currentImageIndex + 1} / {filteredImages.length}
+                  </Box>
+
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      bottom: 20,
+                      left: 20,
+                      backgroundColor: "rgba(0,0,0,0.7)",
+                      color: "white",
+                      px: 2,
+                      py: 1,
+                      borderRadius: 1,
+                      fontSize: "12px",
+                      maxWidth: "300px",
+                    }}
+                  >
+                    {currentImage.title}
+                  </Box>
+                </>
+              );
+            })()}
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "white",
+              fontSize: "18px",
+            }}
+          >
+            No images available
+          </Box>
+        )}
+      </Box>
+    </Box>
   );
 };
 
