@@ -29,10 +29,9 @@ function Root() {
             styleOverrides: {
               "#root": {
                 width: "100%",
-                maxWidth: 1280,
                 minWidth: 320,
-                margin: "0 auto",
-                padding: "0 2rem 2rem 2rem",
+                margin: "0",
+                padding: "0",
               },
             },
           },

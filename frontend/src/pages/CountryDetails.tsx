@@ -6,15 +6,13 @@ import {
   Typography,
   Card,
   CardContent,
-  Chip,
   CircularProgress,
   Alert,
-  Stack,
   IconButton,
 } from "@mui/material";
 import { ArrowBack, ArrowForward } from "@mui/icons-material";
 import { useParams } from "react-router-dom";
-import { getBasicCountryData, getWikiDataByCode } from "../api/countries";
+import { getRestCountriesData, getWikiData } from "../api/countryService";
 import type { CountryDetails } from "../types/api";
 
 const CountryDetails = () => {
@@ -33,25 +31,27 @@ const CountryDetails = () => {
       setCurrentImageIndex(0);
 
       try {
-        const basicData = await getBasicCountryData(code.toUpperCase());
+        const basicData = await getRestCountriesData(code.toUpperCase());
 
         setCountry({
           ...basicData,
           wikiData: undefined,
         });
-        setLoading(false);
 
         setWikiDataLoading(true);
         try {
-          const wikiData = await getWikiDataByCode(code.toUpperCase());
+          const wikiData = await getWikiData(code.toUpperCase());
 
-          setCountry((prev: CountryDetails | null) =>
-            prev
-              ? {
-                  ...prev,
-                  wikiData,
-                }
-              : null
+          setCountry(
+            (
+              prev: CountryDetails | null //country should never be null
+            ) =>
+              prev
+                ? {
+                    ...prev,
+                    wikiData,
+                  }
+                : null
           );
         } catch (wikiError) {
           console.warn("WikiData loading failed:", wikiError);
@@ -60,6 +60,8 @@ const CountryDetails = () => {
         }
       } catch (error) {
         console.error("Error loading basic country data:", error);
+      } finally {
+        // handle all cleanup in the finally
         setLoading(false);
       }
     };
@@ -85,6 +87,9 @@ const CountryDetails = () => {
       </Container>
     );
   }
+
+  // dont cover whole height but container for reusability
+  // split in different components (information, images, etc.)
 
   return (
     <Box sx={{ height: "100vh", display: "flex", overflow: "hidden" }}>
@@ -186,70 +191,61 @@ const CountryDetails = () => {
                 </Box>
               )}
 
-              {country.wikiData &&
-                ((country.wikiData.religions &&
-                  country.wikiData.religions.length > 0) ||
-                  (country.wikiData.ethnicGroups &&
-                    country.wikiData.ethnicGroups.length > 0) ||
-                  (country.wikiData.governmentType &&
-                    country.wikiData.governmentType.trim().length > 0) ||
-                  country.wikiData.hdi ||
-                  country.wikiData.gdpPerCapita ||
-                  country.wikiData.lifeExpectancy ||
-                  country.wikiData.literacyRate) && (
-                  <>
-                    <Typography
-                      variant="h6"
-                      sx={{ mb: 2, color: "primary.main" }}
-                    >
-                      Additional Information
+              {/* nullish coalescence ?? or optional chaining ? - if no country return null */}
+              {country.wikiData && (
+                <>
+                  <Typography
+                    variant="h6"
+                    sx={{ mb: 2, color: "primary.main" }}
+                  >
+                    Additional Information
+                  </Typography>
+                  {country.wikiData.religions &&
+                    country.wikiData.religions.length > 0 && (
+                      <Typography variant="body1" sx={{ mb: 1 }}>
+                        <strong>Religions:</strong>{" "}
+                        {country.wikiData.religions.join(", ")}
+                      </Typography>
+                    )}
+                  {country.wikiData.ethnicGroups &&
+                    country.wikiData.ethnicGroups.length > 0 && (
+                      <Typography variant="body1" sx={{ mb: 1 }}>
+                        <strong>Ethnic Groups:</strong>{" "}
+                        {country.wikiData.ethnicGroups.join(", ")}
+                      </Typography>
+                    )}
+                  {country.wikiData.governmentType &&
+                    country.wikiData.governmentType.trim().length > 0 && (
+                      <Typography variant="body1" sx={{ mb: 1 }}>
+                        <strong>Government:</strong>{" "}
+                        {country.wikiData.governmentType}
+                      </Typography>
+                    )}
+                  {country.wikiData.hdi && (
+                    <Typography variant="body1" sx={{ mb: 1 }}>
+                      <strong>HDI:</strong> {country.wikiData.hdi.toFixed(3)}
                     </Typography>
-                    {country.wikiData.religions &&
-                      country.wikiData.religions.length > 0 && (
-                        <Typography variant="body1" sx={{ mb: 1 }}>
-                          <strong>Religions:</strong>{" "}
-                          {country.wikiData.religions.join(", ")}
-                        </Typography>
-                      )}
-                    {country.wikiData.ethnicGroups &&
-                      country.wikiData.ethnicGroups.length > 0 && (
-                        <Typography variant="body1" sx={{ mb: 1 }}>
-                          <strong>Ethnic Groups:</strong>{" "}
-                          {country.wikiData.ethnicGroups.join(", ")}
-                        </Typography>
-                      )}
-                    {country.wikiData.governmentType &&
-                      country.wikiData.governmentType.trim().length > 0 && (
-                        <Typography variant="body1" sx={{ mb: 1 }}>
-                          <strong>Government:</strong>{" "}
-                          {country.wikiData.governmentType}
-                        </Typography>
-                      )}
-                    {country.wikiData.hdi && (
-                      <Typography variant="body1" sx={{ mb: 1 }}>
-                        <strong>HDI:</strong> {country.wikiData.hdi.toFixed(3)}
-                      </Typography>
-                    )}
-                    {country.wikiData.gdpPerCapita && (
-                      <Typography variant="body1" sx={{ mb: 1 }}>
-                        <strong>GDP per Capita:</strong> $
-                        {country.wikiData.gdpPerCapita.toLocaleString()}
-                      </Typography>
-                    )}
-                    {country.wikiData.lifeExpectancy && (
-                      <Typography variant="body1" sx={{ mb: 1 }}>
-                        <strong>Life Expectancy:</strong>{" "}
-                        {country.wikiData.lifeExpectancy.toFixed(1)} years
-                      </Typography>
-                    )}
-                    {country.wikiData.literacyRate && (
-                      <Typography variant="body1" sx={{ mb: 1 }}>
-                        <strong>Literacy Rate:</strong>{" "}
-                        {country.wikiData.literacyRate.toFixed(1)}%
-                      </Typography>
-                    )}
-                  </>
-                )}
+                  )}
+                  {country.wikiData.gdpPerCapita && (
+                    <Typography variant="body1" sx={{ mb: 1 }}>
+                      <strong>GDP per Capita:</strong> $
+                      {country.wikiData.gdpPerCapita.toLocaleString()}
+                    </Typography>
+                  )}
+                  {country.wikiData.lifeExpectancy && (
+                    <Typography variant="body1" sx={{ mb: 1 }}>
+                      <strong>Life Expectancy:</strong>{" "}
+                      {country.wikiData.lifeExpectancy.toFixed(1)} years
+                    </Typography>
+                  )}
+                  {country.wikiData.literacyRate && (
+                    <Typography variant="body1" sx={{ mb: 1 }}>
+                      <strong>Literacy Rate:</strong>{" "}
+                      {country.wikiData.literacyRate.toFixed(1)}%
+                    </Typography>
+                  )}
+                </>
+              )}
             </CardContent>
           </Card>
         </Box>
@@ -274,6 +270,7 @@ const CountryDetails = () => {
               justifyContent: "center",
             }}
           >
+            {/* {getFilteredImages(country)} */}
             {(() => {
               // Filter images once
               const filteredImages = country.wikiData.images.filter((img) => {

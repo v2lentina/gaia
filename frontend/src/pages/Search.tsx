@@ -21,7 +21,7 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import SortIcon from "@mui/icons-material/Sort";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import type { Country } from "../types/api";
-import { searchCountries } from "../api/countries";
+import { searchCountriesByName } from "../api/countryService";
 
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -81,7 +81,7 @@ const Search = () => {
 
     try {
       // Use service function instead of direct axios call
-      const countries = await searchCountries(searchTerm);
+      const countries = await searchCountriesByName(searchTerm);
 
       setSearchResults(countries);
     } catch (error) {

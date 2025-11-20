@@ -17,7 +17,7 @@ import {
 import { SearchOutlined } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import type { Country } from "../types/api";
-import { searchCountries } from "../api/countries";
+import { searchCountriesByName } from "../api/countryService";
 
 const HomePage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -39,7 +39,7 @@ const HomePage = () => {
       setIsLoading(true);
       try {
         // Use service function
-        const countries = await searchCountries(searchTerm);
+        const countries = await searchCountriesByName(searchTerm);
 
         setSearchResults(countries);
         setShowDropdown(true);

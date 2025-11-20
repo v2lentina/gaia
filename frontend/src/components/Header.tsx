@@ -1,6 +1,5 @@
 import { AppBar, Toolbar, Box, IconButton, Typography } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import LanguageIcon from "@mui/icons-material/Language";
 import MapIcon from "@mui/icons-material/Map";
 import { useNavigate } from "react-router-dom";
 
@@ -38,9 +37,6 @@ const Header = () => {
           <Box>
             <IconButton onClick={() => navigate("/")}>
               <SearchIcon />
-            </IconButton>
-            <IconButton onClick={() => navigate("/search")}>
-              <LanguageIcon />
             </IconButton>
             <IconButton onClick={() => navigate("/map")}>
               <MapIcon />
