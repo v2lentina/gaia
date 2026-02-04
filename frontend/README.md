@@ -1,69 +1,58 @@
-# React + TypeScript + Vite
+# 🌍 Gaia - Interactive World Explorer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Explore countries around the globe with an interactive map, detailed information, and real-time weather data.
 
-Currently, two official plugins are available:
+## ✨ Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Interactive World Map** - Click on any country to explore
+- **Country Details** - Population, languages, currencies, government & more
+- **Wikipedia Integration** - Images and additional facts from WikiData
+- **Live Weather** - Real-time weather via Module Federation (Remote App)
+- **Beautiful UI** - Material UI with responsive design
 
-## Expanding the ESLint configuration
+## 🛠️ Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- React 19 + TypeScript
+- Vite + Module Federation
+- Material UI
+- React Simple Maps
+- REST Countries API + WikiData API
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🚀 Quick Start
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+```bash
+# Install dependencies
+npm install
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Start development server
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+**With Weather Widget:**
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+# Start Weather Remote (in weather-app folder)
+cd ../weather-app && npm run build && npm run preview
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Then start Gaia
+npm run dev
 ```
+
+## 📁 Project Structure
+
+```
+src/
+├── components/     # Reusable UI components
+│   ├── CountryBasicInfo.tsx
+│   ├── CountryWikiData.tsx
+│   └── CountryImages.tsx
+├── pages/          # Route pages
+│   ├── WorldMap.tsx
+│   └── CountryDetailsPage.tsx
+├── api/            # API services
+└── types/          # TypeScript types
+```
+
+---
+
+Built with ❤️ and curiosity about our world.
