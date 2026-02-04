@@ -1,7 +1,3 @@
-// main.tsx
-// Entry point of the React application.
-// Renders the App component into the DOM and wraps it with BrowserRouter for routing and StrictMode for development checks.
-
 import { StrictMode, useMemo } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
@@ -10,7 +6,6 @@ import CssBaseline from "@mui/material/CssBaseline";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import App from "./App.tsx";
 
-// Top-level component that wraps the application with necessary providers
 function Root() {
   const prefersDark = useMediaQuery("(prefers-color-scheme: dark)");
   const theme = useMemo(

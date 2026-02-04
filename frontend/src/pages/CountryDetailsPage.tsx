@@ -1,5 +1,4 @@
-// CountryDetails.tsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import {
   Container,
   Box,
@@ -13,6 +12,8 @@ import type { CountryDetails } from "../types/api";
 import CountryBasicInfo from "../components/CountryBasicInfo";
 import CountryWikiData from "../components/CountryWikiData";
 import CountryImages from "../components/CountryImages";
+
+const WeatherApp = lazy(() => import("weatherRemote/WeatherApp"));
 
 const CountryDetailsPage = () => {
   const { code } = useParams<{ code: string }>();
@@ -89,10 +90,6 @@ const CountryDetailsPage = () => {
         }}
       >
         <Box sx={{ maxWidth: 600, mx: "auto" }}>
-          <Typography variant="h4" gutterBottom sx={{ mb: 3 }}>
-            {country.name.common} ({country.cca3})
-          </Typography>
-
           <CountryBasicInfo country={country} />
 
           <Box sx={{ mt: 3 }}>
@@ -104,6 +101,15 @@ const CountryDetailsPage = () => {
               loading={wikiDataLoading}
             />
           </Box>
+
+          {/* Weather Widget */}
+          {country.capital?.[0] && (
+            <Box sx={{ mt: 3, display: "flex", justifyContent: "center" }}>
+              <Suspense fallback={<CircularProgress size={24} />}>
+                <WeatherApp city={country.capital[0]} />
+              </Suspense>
+            </Box>
+          )}
         </Box>
       </Box>
 

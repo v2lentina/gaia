@@ -1,12 +1,8 @@
-//App.tsx
-// Root component of the React application. - everything the user sees is rendered through this component.
-// Defines the main structure and behavior of the app, including routes and UI components.
-
 import { Routes, Route } from "react-router-dom";
 import CssBaseline from "@mui/material/CssBaseline";
 import Homepage from "./pages/Homepage";
 import Search from "./pages/Search";
-import CountryDetails from "./pages/CountryDetails";
+import CountryDetails from "./pages/CountryDetailsPage";
 import Header from "./components/Header";
 import WorldMap from "./pages/WorldMap";
 
