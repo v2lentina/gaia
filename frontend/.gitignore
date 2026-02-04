@@ -19,4 +19,4 @@ yarn-error.log*
 .idea/
 
 # TypeScript
-*.tsbuildinfo
+*.tsbuildinfo.DS_Store
