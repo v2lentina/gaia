@@ -5,6 +5,7 @@ import {
   CircularProgress,
   Alert,
   Typography,
+  styled,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { getRestCountriesData, getWikiData } from "../api/countryService";
@@ -12,6 +13,28 @@ import type { CountryDetails } from "../types/api";
 import CountryBasicInfo from "../components/CountryBasicInfo";
 import CountryWikiData from "../components/CountryWikiData";
 import CountryImages from "../components/CountryImages";
+import { HEADER_HEIGHT } from "../components/Header";
+
+// Styled Components
+const PageContainer = styled(Box)({
+  height: `calc(100vh - ${HEADER_HEIGHT}px)`,
+  display: "flex",
+  overflow: "hidden",
+});
+
+const ContentPanel = styled(Box)({
+  flex: "0 0 50%",
+  overflowY: "auto",
+  height: `calc(100vh - ${HEADER_HEIGHT}px)`,
+  padding: "32px 24px",
+});
+
+const ImagePanel = styled(Box)({
+  flex: "0 0 50%",
+  height: `calc(100vh - ${HEADER_HEIGHT}px)`,
+  position: "relative",
+  backgroundColor: "#000",
+});
 
 const WeatherApp = lazy(() =>
   import("weatherRemote/WeatherApp").catch(() => ({
@@ -85,16 +108,8 @@ const CountryDetailsPage = () => {
   }
 
   return (
-    <Box sx={{ height: "100vh", display: "flex", overflow: "hidden" }}>
-      <Box
-        sx={{
-          flex: "0 0 50%",
-          overflowY: "auto",
-          height: "100vh",
-          px: 3,
-          py: 4,
-        }}
-      >
+    <PageContainer>
+      <ContentPanel>
         <Box sx={{ maxWidth: 600, mx: "auto" }}>
           <CountryBasicInfo country={country} />
 
@@ -108,7 +123,6 @@ const CountryDetailsPage = () => {
             />
           </Box>
 
-          {/* Weather Widget */}
           {country.capital?.[0] && (
             <Box sx={{ mt: 3, display: "flex", justifyContent: "center" }}>
               <Suspense fallback={<CircularProgress size={24} />}>
@@ -117,19 +131,12 @@ const CountryDetailsPage = () => {
             </Box>
           )}
         </Box>
-      </Box>
+      </ContentPanel>
 
-      <Box
-        sx={{
-          flex: "0 0 50%",
-          height: "100vh",
-          position: "relative",
-          backgroundColor: "#000",
-        }}
-      >
+      <ImagePanel>
         <CountryImages images={country.wikiData?.images} />
-      </Box>
-    </Box>
+      </ImagePanel>
+    </PageContainer>
   );
 };
 

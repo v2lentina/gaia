@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, IconButton } from "@mui/material";
+import { Box, IconButton, Typography, styled } from "@mui/material";
 import { ArrowBack, ArrowForward } from "@mui/icons-material";
 import type { WikipediaImage } from "../types/api";
 
@@ -13,39 +13,73 @@ const EXCLUDED_KEYWORDS = [
   "wiktionary",
 ];
 
-const overlayBoxSx = {
-  position: "absolute",
-  backgroundColor: "rgba(0,0,0,0.8)",
-  color: "white",
-  px: 2,
-  py: 1,
-  borderRadius: 1,
-};
+// Styled Components
+const ImageContainer = styled(Box)({
+  flex: 1,
+  height: "100%",
+  position: "relative",
+  backgroundColor: "#000",
+  overflow: "hidden",
+});
 
-const navButtonSx = {
+const ImageElement = styled("img")({
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+  objectPosition: "center",
+});
+
+const NavButton = styled(IconButton)({
   position: "absolute",
   top: "calc(50vh - 24px)",
   backgroundColor: "rgba(0,0,0,0.6)",
   color: "white",
   width: 48,
   height: 48,
-  "&:hover": { backgroundColor: "rgba(0,0,0,0.8)" },
-};
+  "&:hover": {
+    backgroundColor: "rgba(0,0,0,0.8)",
+  },
+});
+
+const OverlayBox = styled(Box)({
+  position: "absolute",
+  backgroundColor: "rgba(0,0,0,0.8)",
+  color: "white",
+  padding: "8px 16px",
+  borderRadius: 4,
+});
+
+const TitleBox = styled(OverlayBox)({
+  fontSize: 12,
+  maxWidth: 300,
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+  transition: "all 0.25s ease",
+  cursor: "default",
+  "&:hover": {
+    whiteSpace: "normal",
+    overflow: "visible",
+    maxWidth: "none",
+    backgroundColor: "rgba(0,0,0,0.9)",
+    zIndex: 9999,
+  },
+});
+
+const PlaceholderContainer = styled(Box)({
+  flex: 1,
+  height: "100%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  backgroundColor: "#000",
+  color: "white",
+});
 
 const NoImagesPlaceholder = () => (
-  <Box
-    sx={{
-      flex: 1,
-      height: "100%",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: "#000",
-      color: "white",
-    }}
-  >
-    No images available
-  </Box>
+  <PlaceholderContainer>
+    <Typography>No images available</Typography>
+  </PlaceholderContainer>
 );
 
 // Filter valid images
@@ -79,80 +113,28 @@ const CountryImages = ({ images }: { images?: WikipediaImage[] }) => {
     setCurrentIndex((i) => (i === totalImages - 1 ? 0 : i + 1));
 
   return (
-    <Box
-      sx={{
-        flex: 1,
-        height: "100%",
-        position: "relative",
-        backgroundColor: "#000",
-        overflow: "hidden",
-      }}
-    >
-      {/* Main Image */}
-      <Box
-        component="img"
-        src={`https:${url}`}
-        alt={current.title}
-        sx={{
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          objectPosition: "center",
-        }}
-      />
+    <ImageContainer>
+      <ImageElement src={`https:${url}`} alt={current.title} />
 
-      {/* Navigation Buttons */}
       {totalImages > 1 && (
         <>
-          <IconButton onClick={goPrev} sx={{ ...navButtonSx, left: 20 }}>
+          <NavButton onClick={goPrev} sx={{ left: 20 }}>
             <ArrowBack />
-          </IconButton>
-          <IconButton onClick={goNext} sx={{ ...navButtonSx, right: 20 }}>
+          </NavButton>
+          <NavButton onClick={goNext} sx={{ right: 20 }}>
             <ArrowForward />
-          </IconButton>
+          </NavButton>
         </>
       )}
 
-      {/* Image Counter */}
-      <Box
-        sx={{
-          ...overlayBoxSx,
-          top: 20,
-          right: 20,
-          fontSize: 14,
-          fontWeight: "bold",
-        }}
-      >
+      <OverlayBox sx={{ top: 20, right: 20, fontWeight: "bold" }}>
         {currentIndex + 1} / {totalImages}
-      </Box>
+      </OverlayBox>
 
-      {/* Image Title */}
       {current.title && (
-        <Box
-          sx={{
-            ...overlayBoxSx,
-            top: 20,
-            left: 20,
-            fontSize: 12,
-            maxWidth: 300,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            transition: "all 0.25s ease",
-            cursor: "default",
-            "&:hover": {
-              whiteSpace: "normal",
-              overflow: "visible",
-              maxWidth: "none",
-              backgroundColor: "rgba(0,0,0,0.9)",
-              zIndex: 9999,
-            },
-          }}
-        >
-          {current.title}
-        </Box>
+        <TitleBox sx={{ top: 20, left: 20 }}>{current.title}</TitleBox>
       )}
-    </Box>
+    </ImageContainer>
   );
 };
 

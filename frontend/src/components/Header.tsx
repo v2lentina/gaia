@@ -1,38 +1,53 @@
-import { AppBar, Toolbar, Box, IconButton, Typography } from "@mui/material";
+import {
+  AppBar,
+  Toolbar,
+  Box,
+  IconButton,
+  Typography,
+  styled,
+} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import MapIcon from "@mui/icons-material/Map";
 import { useNavigate } from "react-router-dom";
+
+// Export header height for layout calculations
+export const HEADER_HEIGHT = 64;
+
+// Styled Components
+const HeaderContainer = styled(Box)({
+  borderBottom: "1px solid #e0e0e0",
+  width: "100vw",
+  position: "relative",
+  left: "50%",
+  right: "50%",
+  marginLeft: "-50vw",
+  marginRight: "-50vw",
+  padding: 0,
+});
+
+const StyledToolbar = styled(Toolbar)({
+  display: "flex",
+  justifyContent: "space-between",
+  minHeight: HEADER_HEIGHT,
+});
+
+const Logo = styled(Typography)(({ theme }) => ({
+  color: theme.palette.primary.main,
+  marginBottom: 0,
+  fontWeight: 500,
+  cursor: "pointer",
+}));
 
 const Header = () => {
   const navigate = useNavigate();
 
   return (
-    <Box
-      sx={{
-        borderBottom: "1px solid #e0e0e0",
-        width: "100vw",
-        position: "relative",
-        left: "50%",
-        right: "50%",
-        marginLeft: "-50vw",
-        marginRight: "-50vw",
-        p: 0,
-      }}
-    >
+    <HeaderContainer>
       <AppBar position="static" color="transparent" elevation={0}>
-        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Typography
-            variant="h4"
-            sx={{
-              color: "primary.main",
-              mb: 0,
-              fontWeight: "500",
-              cursor: "pointer",
-            }}
-            onClick={() => navigate("/")}
-          >
+        <StyledToolbar>
+          <Logo variant="h4" onClick={() => navigate("/")}>
             GAIA
-          </Typography>
+          </Logo>
 
           <Box>
             <IconButton onClick={() => navigate("/")}>
@@ -42,9 +57,9 @@ const Header = () => {
               <MapIcon />
             </IconButton>
           </Box>
-        </Toolbar>
+        </StyledToolbar>
       </AppBar>
-    </Box>
+    </HeaderContainer>
   );
 };
 
