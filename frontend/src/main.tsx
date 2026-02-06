@@ -1,10 +1,27 @@
 import { StrictMode, useMemo } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import App from "./App.tsx";
+import RootLayout from "./routes/RootLayout.tsx";
+import Homepage from "./routes/Homepage.tsx";
+import Search from "./routes/Search.tsx";
+import CountryDetails from "./routes/CountryDetailsPage.tsx";
+import WorldMap from "./routes/WorldMap.tsx";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <RootLayout />,
+    children: [
+      { index: true, element: <Homepage /> },
+      { path: "search", element: <Search /> },
+      { path: "country/:code", element: <CountryDetails /> },
+      { path: "map", element: <WorldMap /> },
+    ],
+  },
+]);
 
 function Root() {
   const prefersDark = useMediaQuery("(prefers-color-scheme: dark)");
@@ -38,15 +55,13 @@ function Root() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <App />
+      <RouterProvider router={router} />
     </ThemeProvider>
   );
 }
 
 createRoot(document.getElementById("root")!).render(
-  <BrowserRouter>
-    <StrictMode>
-      <Root />
-    </StrictMode>
-  </BrowserRouter>
+  <StrictMode>
+    <Root />
+  </StrictMode>
 );
