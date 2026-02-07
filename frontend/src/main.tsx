@@ -10,18 +10,23 @@ import Search from "./routes/Search.tsx";
 import CountryDetails from "./routes/CountryDetailsPage.tsx";
 import WorldMap from "./routes/WorldMap.tsx";
 
-const router = createBrowserRouter([
+const router = createBrowserRouter(
+  [
+    {
+      path: "/",
+      element: <RootLayout />,
+      children: [
+        { index: true, element: <Homepage /> },
+        { path: "search", element: <Search /> },
+        { path: "country/:code", element: <CountryDetails /> },
+        { path: "map", element: <WorldMap /> },
+      ],
+    },
+  ],
   {
-    path: "/",
-    element: <RootLayout />,
-    children: [
-      { index: true, element: <Homepage /> },
-      { path: "search", element: <Search /> },
-      { path: "country/:code", element: <CountryDetails /> },
-      { path: "map", element: <WorldMap /> },
-    ],
-  },
-]);
+    basename: import.meta.env.BASE_URL,
+  }
+);
 
 function Root() {
   const prefersDark = useMediaQuery("(prefers-color-scheme: dark)");
