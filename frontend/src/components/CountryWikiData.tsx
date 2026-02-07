@@ -1,10 +1,4 @@
-import {
-  Card,
-  CardContent,
-  Typography,
-  Box,
-  CircularProgress,
-} from "@mui/material";
+import { Card, CardContent, Typography, CircularProgress } from "@mui/material";
 import type { WikiDataFields } from "../types/api";
 
 // Reusable info row component

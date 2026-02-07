@@ -72,6 +72,8 @@ const WorldMap = () => {
                     key={geo.rsmKey}
                     geography={geo}
                     onClick={() => handleCountryClick(geo)}
+                    data-tooltip-id="country-tooltip"
+                    data-tooltip-content={name}
                     style={{
                       default: {
                         fill: "#D6D6DA",
@@ -89,10 +91,7 @@ const WorldMap = () => {
                         outline: "none",
                       },
                     }}
-                  >
-                    {/* SVG-Tooltip */}
-                    {name && <title>{name}</title>}
-                  </Geography>
+                  />
                 );
               })
             }
