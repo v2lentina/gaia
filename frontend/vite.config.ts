@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
 
   const weatherRemoteUrl = isDev
     ? "http://localhost:3001/assets/remoteEntry.js"
-    : "https://v2lentina.github.io/WeatherApi/assets/remoteEntry.js";
+    : "https://v2lentina.github.io/weather-app/assets/remoteEntry.js";
 
   return {
     base: "/gaia/",
