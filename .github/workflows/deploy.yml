@@ -39,13 +39,13 @@ jobs:
         if: github.ref == 'refs/heads/staging'
         run: |
           cd frontend
-          npm run build:staging
+          npm run build -- --mode staging
 
       - name: Build for Production
         if: github.ref == 'refs/heads/main'
         run: |
           cd frontend
-          npm run build:production
+          npm run build
 
       # Staging: Push to gaia-staging repo
       - name: Deploy to gaia-staging Repo

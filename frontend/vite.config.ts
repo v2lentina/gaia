@@ -5,13 +5,14 @@ import federation from "@originjs/vite-plugin-federation";
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const isDev = mode === "development";
+  const isStaging = mode === "staging";
 
   const weatherRemoteUrl = isDev
     ? "http://localhost:3001/assets/remoteEntry.js"
     : "https://v2lentina.github.io/weather-app/assets/remoteEntry.js";
 
   return {
-    base: "/gaia/",
+    base: isStaging ? "/gaia-staging/" : "/gaia/",
     plugins: [
       react(),
       federation({
