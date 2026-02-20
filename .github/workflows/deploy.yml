@@ -1,9 +1,10 @@
-name: Deploy to GitHub Pages
+name: Deploy Frontend
 
 on:
   push:
     branches:
-      - main
+      - main # Production (deploy to this repo's GitHub Pages)
+      - staging # Staging (push build to gaia-staging repo)
   workflow_dispatch:
 
 permissions:
@@ -34,20 +35,43 @@ jobs:
           cd frontend
           npm ci
 
-      - name: Build
+      - name: Build for Staging
+        if: github.ref == 'refs/heads/staging'
         run: |
           cd frontend
-          npm run build
+          npm run build:staging
 
+      - name: Build for Production
+        if: github.ref == 'refs/heads/main'
+        run: |
+          cd frontend
+          npm run build:production
+
+      # Staging: Push to gaia-staging repo
+      - name: Deploy to gaia-staging Repo
+        if: github.ref == 'refs/heads/staging'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          personal_token: ${{ secrets.STAGING_DEPLOY_TOKEN }}
+          external_repository: v2lentina/gaia-staging
+          publish_branch: main
+          publish_dir: frontend/dist
+          cname: staging.gaia.com
+
+      # Production: Setup for GitHub Pages on this repo
       - name: Setup Pages
+        if: github.ref == 'refs/heads/main'
         uses: actions/configure-pages@v4
 
       - name: Upload artifact
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: frontend/dist
 
+  # Production: Deploy job (only for main branch)
   deploy:
+    if: github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
