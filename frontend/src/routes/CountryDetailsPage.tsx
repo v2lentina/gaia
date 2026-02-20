@@ -13,6 +13,7 @@ import type { CountryDetails } from "../types/api";
 import CountryBasicInfo from "../components/CountryBasicInfo";
 import CountryWikiData from "../components/CountryWikiData";
 import CountryImages from "../components/CountryImages";
+import CountrySummary from "../components/CountrySummary";
 import { HEADER_HEIGHT } from "../components/Header";
 
 // Styled Components
@@ -99,6 +100,8 @@ const CountryDetailsPage = () => {
             </Typography>
             <CountryWikiData wikiData={country.wikiData} />
           </Box>
+
+          <CountrySummary countryName={country.name.common} />
 
           {country.capital?.[0] && (
             <Box sx={{ mt: 3, display: "flex", justifyContent: "center" }}>

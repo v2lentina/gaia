@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { Country, CountryDetails } from "../types/api";
+import type { Country, CountryDetails, SummaryResponse } from "../types/api";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
@@ -40,5 +40,25 @@ export const getCountryByCode = async (
       timeout: 30000,
     }
   );
+  return data;
+};
+
+/**
+ * Get AI-generated summary for a country
+ * Calls: GET /api/summary?q=<countryName>
+ */
+export const getCountrySummary = async (
+  countryName: string
+): Promise<SummaryResponse> => {
+  if (!countryName.trim()) throw new Error("Invalid country name");
+
+  const { data } = await axios.get<SummaryResponse>(
+    `${API_BASE_URL}/api/summary`,
+    {
+      params: { q: countryName.trim() },
+      timeout: 60000, // 60 seconds for LLM generation
+    }
+  );
+
   return data;
 };

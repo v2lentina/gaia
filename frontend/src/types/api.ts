@@ -65,6 +65,12 @@ export interface CountryDetails extends RestCountriesData {
   wikiData?: WikiDataFields; // Optional in case API call fails
 }
 
+export interface SummaryResponse {
+  query: string;
+  summary: string;
+  fromCache: boolean;
+}
+
 export interface ApiError {
   error: string;
   message?: string;
