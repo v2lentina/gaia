@@ -6,6 +6,10 @@ dist/
 build/
 .vite/
 
+# Environment variables
+.env
+.env.local
+
 # System files
 .DS_Store
 

@@ -8,7 +8,7 @@ import {
   styled,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
-import { getRestCountriesData, getWikiData } from "../api/countryService";
+import { getCountryByCode } from "../api/countryService";
 import type { CountryDetails } from "../types/api";
 import CountryBasicInfo from "../components/CountryBasicInfo";
 import CountryWikiData from "../components/CountryWikiData";
@@ -48,39 +48,19 @@ const CountryDetailsPage = () => {
   const { code } = useParams<{ code: string }>();
   const [country, setCountry] = useState<CountryDetails | null>(null);
   const [loading, setLoading] = useState(true);
-  const [wikiDataLoading, setWikiDataLoading] = useState(false);
 
   useEffect(() => {
     const loadCountryData = async () => {
       if (!code) return;
 
       setLoading(true);
-      setWikiDataLoading(false);
 
       try {
-        const basicData = await getRestCountriesData(code.toUpperCase());
-
-        setCountry({
-          ...basicData,
-          wikiData: undefined,
-        });
-
-        setWikiDataLoading(true);
-        try {
-          const wikiData = await getWikiData(code.toUpperCase());
-
-          setCountry(
-            (prev) => (prev ? { ...prev, wikiData } : null) //country should never be null
-          );
-        } catch (wikiError) {
-          console.warn("WikiData loading failed:", wikiError);
-        } finally {
-          setWikiDataLoading(false);
-        }
+        const countryData = await getCountryByCode(code.toUpperCase());
+        setCountry(countryData);
       } catch (error) {
-        console.error("Error loading basic country data:", error);
+        console.error("Error loading country data:", error);
       } finally {
-        // handle all cleanup in the finally
         setLoading(false);
       }
     };
@@ -117,10 +97,7 @@ const CountryDetailsPage = () => {
             <Typography variant="h6" sx={{ mb: 2, color: "primary.main" }}>
               Additional Information
             </Typography>
-            <CountryWikiData
-              wikiData={country.wikiData}
-              loading={wikiDataLoading}
-            />
+            <CountryWikiData wikiData={country.wikiData} />
           </Box>
 
           {country.capital?.[0] && (
