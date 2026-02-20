@@ -56,7 +56,6 @@ jobs:
           external_repository: v2lentina/gaia-staging
           publish_branch: main
           publish_dir: frontend/dist
-          cname: staging.gaia.com
 
       # Production: Setup for GitHub Pages on this repo
       - name: Setup Pages
