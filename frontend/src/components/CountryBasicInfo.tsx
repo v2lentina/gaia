@@ -1,15 +1,10 @@
 import { Card, CardContent, Typography, Box } from "@mui/material";
 import type { RestCountriesData } from "../types/api";
-
-const InfoRow = ({ label, value }: { label: string; value: string }) => (
-  <Typography variant="body1" sx={{ mb: 1 }}>
-    <strong>{label}:</strong> {value}
-  </Typography>
-);
+import InfoRow from "./InfoRow";
 
 const CountryBasicInfo = ({ country }: { country: RestCountriesData }) => {
   const formatCurrencies = () => {
-    if (!country.currencies) return "N/A";
+    if (!country.currencies) return "No currencies available";
     return Object.entries(country.currencies)
       .map(([code, currency]) => `${currency.name} (${code})`)
       .join(", ");
@@ -17,33 +12,44 @@ const CountryBasicInfo = ({ country }: { country: RestCountriesData }) => {
 
   const infoItems = [
     { label: "Official Name", value: country.name.official },
-    { label: "Capital", value: country.capital?.join(", ") || "N/A" },
-    { label: "Region", value: country.region || "N/A" },
-    { label: "Subregion", value: country.subregion || "N/A" },
-    { label: "Borders", value: country.borders?.join(", ") || "N/A" },
-    { label: "Continent", value: country.continents?.join(", ") || "N/A" },
+    { label: "Capital", value: country.capital?.join(", ") },
+    { label: "Region", value: country.region },
+    { label: "Subregion", value: country.subregion },
+    { label: "Borders", value: country.borders?.join(", ") },
+    { label: "Continent", value: country.continents?.join(", ") },
     { label: "Landlocked", value: country.landlocked ? "Yes" : "No" },
     {
       label: "Population",
-      value: country.population?.toLocaleString() || "N/A",
+      value: country.population?.toLocaleString(),
     },
-    { label: "Area", value: `${country.area?.toLocaleString() || "N/A"} km²` },
+    {
+      label: "Area",
+      value: country.area ? `${country.area.toLocaleString()} km²` : undefined,
+    },
     {
       label: "Languages",
       value: country.languages
         ? Object.values(country.languages).join(", ")
-        : "N/A",
+        : undefined,
     },
     { label: "Currencies", value: formatCurrencies() },
-    { label: "Timezones", value: country.timezones?.join(", ") || "N/A" },
+    { label: "Timezones", value: country.timezones?.join(", ") },
     { label: "Independent", value: country.independent ? "Yes" : "No" },
     { label: "UN Member", value: country.unMember ? "Yes" : "No" },
-  ];
+  ].filter((item): item is { label: string; value: string } => !!item.value);
 
   return (
     <Box>
       {/* Header with Flag */}
-      <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          mb: 3,
+          flexWrap: "wrap",
+          gap: 2,
+        }}
+      >
         <Box>
           <Typography variant="h4" component="h1" gutterBottom>
             {country.name?.common}
@@ -59,15 +65,14 @@ const CountryBasicInfo = ({ country }: { country: RestCountriesData }) => {
           sx={{
             width: 240,
             objectFit: "cover",
-            ml: 2.5,
             border: "1px solid #ccc",
           }}
         />
       </Box>
 
       {/* Basic Information */}
-      <Card sx={{ boxShadow: 0 }}>
-        <CardContent sx={{ p: 0, "&:last-child": { pb: 0 } }}>
+      <Card>
+        <CardContent>
           {infoItems.map((item) => (
             <InfoRow key={item.label} label={item.label} value={item.value} />
           ))}

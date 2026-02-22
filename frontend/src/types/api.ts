@@ -58,7 +58,7 @@ export interface WikiDataFields {
   lifeExpectancy?: number;
   literacyRate?: number;
   enwikiTitle?: string;
-  images?: WikipediaImage[]; // Neue Wikipedia Images
+  images?: WikipediaImage[];
 }
 
 export interface CountryDetails extends RestCountriesData {
@@ -71,10 +71,14 @@ export interface SummaryResponse {
   fromCache: boolean;
 }
 
-export interface ApiError {
-  error: string;
-  message?: string;
-  statusCode: number;
+export class ApiError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
 }
 
 // Discriminated Union

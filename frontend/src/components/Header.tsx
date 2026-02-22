@@ -1,11 +1,4 @@
-import {
-  AppBar,
-  Toolbar,
-  Box,
-  IconButton,
-  Typography,
-  styled,
-} from "@mui/material";
+import { AppBar, Toolbar, Box, IconButton, Typography } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import MapIcon from "@mui/icons-material/Map";
 import { useNavigate } from "react-router-dom";
@@ -13,41 +6,42 @@ import { useNavigate } from "react-router-dom";
 // Export header height for layout calculations
 export const HEADER_HEIGHT = 64;
 
-// Styled Components
-const HeaderContainer = styled(Box)({
-  borderBottom: "1px solid #e0e0e0",
-  width: "100vw",
-  position: "relative",
-  left: "50%",
-  right: "50%",
-  marginLeft: "-50vw",
-  marginRight: "-50vw",
-  padding: 0,
-});
-
-const StyledToolbar = styled(Toolbar)({
-  display: "flex",
-  justifyContent: "space-between",
-  minHeight: HEADER_HEIGHT,
-});
-
-const Logo = styled(Typography)(({ theme }) => ({
-  color: theme.palette.primary.main,
-  marginBottom: 0,
-  fontWeight: 500,
-  cursor: "pointer",
-}));
-
 const Header = () => {
   const navigate = useNavigate();
 
   return (
-    <HeaderContainer>
+    <Box
+      sx={{
+        borderBottom: "1px solid #e0e0e0",
+        width: "100vw",
+        position: "relative",
+        left: "50%",
+        right: "50%",
+        marginLeft: "-50vw",
+        marginRight: "-50vw",
+        padding: 0,
+      }}
+    >
       <AppBar position="static" color="transparent" elevation={0}>
-        <StyledToolbar>
-          <Logo variant="h4" onClick={() => navigate("/")}>
+        <Toolbar
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            minHeight: HEADER_HEIGHT,
+          }}
+        >
+          <Typography
+            variant="h4"
+            onClick={() => navigate("/")}
+            sx={{
+              color: "primary.main",
+              marginBottom: 0,
+              fontWeight: 500,
+              cursor: "pointer",
+            }}
+          >
             GAIA
-          </Logo>
+          </Typography>
 
           <Box>
             <IconButton onClick={() => navigate("/")}>
@@ -57,9 +51,9 @@ const Header = () => {
               <MapIcon />
             </IconButton>
           </Box>
-        </StyledToolbar>
+        </Toolbar>
       </AppBar>
-    </HeaderContainer>
+    </Box>
   );
 };
 

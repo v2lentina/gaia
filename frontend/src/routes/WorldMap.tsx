@@ -2,7 +2,7 @@ import { ComposableMap, Geographies, Geography } from "react-simple-maps";
 import { useNavigate } from "react-router-dom";
 import { Container, Box } from "@mui/material";
 
-const geoUrl = "/ne_10m_admin_0_countries_lakes.json";
+const geoUrl = `${import.meta.env.BASE_URL}ne_10m_admin_0_countries_lakes.json`;
 
 type GeoProperties = {
   ADM0_A3?: string; // 3 letter country code

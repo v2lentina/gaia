@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
     : "https://v2lentina.github.io/weather-app/assets/remoteEntry.js";
 
   return {
-    base: isStaging ? "/gaia-staging/" : "/gaia/",
+    base: isDev ? "/" : isStaging ? "/gaia-staging/" : "/gaia/",
     plugins: [
       react(),
       federation({

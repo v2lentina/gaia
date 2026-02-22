@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, IconButton, Typography, styled } from "@mui/material";
+import { Box, IconButton, Typography } from "@mui/material";
 import { ArrowBack, ArrowForward } from "@mui/icons-material";
 import type { WikipediaImage } from "../types/api";
 
@@ -13,73 +13,20 @@ const EXCLUDED_KEYWORDS = [
   "wiktionary",
 ];
 
-// Styled Components
-const ImageContainer = styled(Box)({
-  flex: 1,
-  height: "100%",
-  position: "relative",
-  backgroundColor: "#000",
-  overflow: "hidden",
-});
-
-const ImageElement = styled("img")({
-  width: "100%",
-  height: "100%",
-  objectFit: "cover",
-  objectPosition: "center",
-});
-
-const NavButton = styled(IconButton)({
-  position: "absolute",
-  top: "calc(50vh - 24px)",
-  backgroundColor: "rgba(0,0,0,0.6)",
-  color: "white",
-  width: 48,
-  height: 48,
-  "&:hover": {
-    backgroundColor: "rgba(0,0,0,0.8)",
-  },
-});
-
-const OverlayBox = styled(Box)({
-  position: "absolute",
-  backgroundColor: "rgba(0,0,0,0.8)",
-  color: "white",
-  padding: "8px 16px",
-  borderRadius: 4,
-});
-
-const TitleBox = styled(OverlayBox)({
-  fontSize: 12,
-  maxWidth: 300,
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-  transition: "all 0.25s ease",
-  cursor: "default",
-  "&:hover": {
-    whiteSpace: "normal",
-    overflow: "visible",
-    maxWidth: "none",
-    backgroundColor: "rgba(0,0,0,0.9)",
-    zIndex: 9999,
-  },
-});
-
-const PlaceholderContainer = styled(Box)({
-  flex: 1,
-  height: "100%",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  backgroundColor: "#000",
-  color: "white",
-});
-
 const NoImagesPlaceholder = () => (
-  <PlaceholderContainer>
+  <Box
+    sx={{
+      flex: 1,
+      height: "100%",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "#000",
+      color: "white",
+    }}
+  >
     <Typography>No images available</Typography>
-  </PlaceholderContainer>
+  </Box>
 );
 
 // Filter valid images
@@ -113,28 +60,111 @@ const CountryImages = ({ images }: { images?: WikipediaImage[] }) => {
     setCurrentIndex((i) => (i === totalImages - 1 ? 0 : i + 1));
 
   return (
-    <ImageContainer>
-      <ImageElement src={`https:${url}`} alt={current.title} />
+    <Box
+      sx={{
+        flex: 1,
+        height: "100%",
+        position: "relative",
+        backgroundColor: "#000",
+        overflow: "hidden",
+      }}
+    >
+      <Box
+        component="img"
+        src={`https:${url}`}
+        alt={current.title}
+        sx={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          objectPosition: "center",
+        }}
+      />
 
       {totalImages > 1 && (
         <>
-          <NavButton onClick={goPrev} sx={{ left: 20 }}>
+          <IconButton
+            onClick={goPrev}
+            sx={{
+              position: "absolute",
+              top: "calc(50vh - 24px)",
+              left: 20,
+              backgroundColor: "rgba(0,0,0,0.6)",
+              color: "white",
+              width: 48,
+              height: 48,
+              "&:hover": {
+                backgroundColor: "rgba(0,0,0,0.8)",
+              },
+            }}
+          >
             <ArrowBack />
-          </NavButton>
-          <NavButton onClick={goNext} sx={{ right: 20 }}>
+          </IconButton>
+          <IconButton
+            onClick={goNext}
+            sx={{
+              position: "absolute",
+              top: "calc(50vh - 24px)",
+              right: 20,
+              backgroundColor: "rgba(0,0,0,0.6)",
+              color: "white",
+              width: 48,
+              height: 48,
+              "&:hover": {
+                backgroundColor: "rgba(0,0,0,0.8)",
+              },
+            }}
+          >
             <ArrowForward />
-          </NavButton>
+          </IconButton>
         </>
       )}
 
-      <OverlayBox sx={{ top: 20, right: 20, fontWeight: "bold" }}>
+      <Box
+        sx={{
+          position: "absolute",
+          top: 20,
+          right: 20,
+          backgroundColor: "rgba(0,0,0,0.8)",
+          color: "white",
+          padding: "8px 16px",
+          borderRadius: 1,
+          fontWeight: "bold",
+        }}
+      >
         {currentIndex + 1} / {totalImages}
-      </OverlayBox>
+      </Box>
 
       {current.title && (
-        <TitleBox sx={{ top: 20, left: 20 }}>{current.title}</TitleBox>
+        <Box
+          sx={{
+            position: "absolute",
+            top: 20,
+            left: 20,
+            backgroundColor: "rgba(0,0,0,0.8)",
+            color: "white",
+            padding: "8px 16px",
+            borderRadius: 1,
+            fontSize: 12,
+            maxWidth: 300,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            transition: "all 0.25s ease",
+            cursor: "default",
+            "&:hover": {
+              whiteSpace: "normal",
+              overflow: "visible",
+              maxWidth: "none",
+              backgroundColor: "rgba(0,0,0,0.9)",
+              zIndex: 9999,
+            },
+          }}
+        >
+          {current.title}
+        </Box>
       )}
-    </ImageContainer>
+    </Box>
   );
 };
 

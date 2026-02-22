@@ -1,4 +1,3 @@
-// HomePage.tsx
 import React, { useState, useEffect } from "react";
 import {
   Container,
@@ -26,11 +25,9 @@ const HomePage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Debounced search for dropdown suggestions
   useEffect(() => {
     const performSearch = async () => {
       if (!searchTerm.trim()) {
-        // Validate search term and dont send request if empty
         setSearchResults([]);
         setShowDropdown(false);
         return;
@@ -38,7 +35,6 @@ const HomePage = () => {
 
       setIsLoading(true);
       try {
-        // Use service function
         const countries = await searchCountriesByName(searchTerm);
 
         setSearchResults(countries);
@@ -56,12 +52,10 @@ const HomePage = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Handle input change - triggers new search
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
 
-  // Handle Enter key press - navigate to search results page
   const handleKeyPress = (event: React.KeyboardEvent) => {
     if (event.key === "Enter" && searchTerm.trim()) {
       navigate(`/search?query=${encodeURIComponent(searchTerm.trim())}`);
@@ -69,7 +63,6 @@ const HomePage = () => {
     }
   };
 
-  //TXS
   return (
     <Container maxWidth="md">
       <Box
@@ -109,15 +102,17 @@ const HomePage = () => {
             placeholder="Search for a country..."
             value={searchTerm}
             onChange={handleInputChange}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyPress}
             onFocus={() => searchTerm && setShowDropdown(true)}
             onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchOutlined />
-                </InputAdornment>
-              ),
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchOutlined />
+                  </InputAdornment>
+                ),
+              },
             }}
             sx={{
               width: "100%",

@@ -11,11 +11,7 @@ import { getCountrySummary } from "../api/countryService";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import ReactMarkdown from "react-markdown";
 
-interface CountrySummaryProps {
-  countryName: string;
-}
-
-const CountrySummary = ({ countryName }: CountrySummaryProps) => {
+const CountrySummary = ({ countryName }: { countryName: string }) => {
   const [summary, setSummary] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,8 +19,6 @@ const CountrySummary = ({ countryName }: CountrySummaryProps) => {
 
   useEffect(() => {
     const loadSummary = async () => {
-      if (!countryName) return;
-
       setLoading(true);
       setError(null);
 
@@ -33,7 +27,7 @@ const CountrySummary = ({ countryName }: CountrySummaryProps) => {
         setSummary(result.summary);
         setFromCache(result.fromCache);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load summary");
+        setError("Unable to generate summary. Please try again later.");
         console.error("Error loading summary:", err);
       } finally {
         setLoading(false);
@@ -60,7 +54,7 @@ const CountrySummary = ({ countryName }: CountrySummaryProps) => {
 
   if (error) {
     return (
-      <Card sx={{ mb: 3 }}>
+      <Card>
         <CardContent>
           <Alert severity="warning">{error}</Alert>
         </CardContent>
@@ -73,17 +67,20 @@ const CountrySummary = ({ countryName }: CountrySummaryProps) => {
   }
 
   return (
-    <Card sx={{}}>
+    <Card>
       <CardContent>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-          <AutoAwesomeIcon sx={{ color: "#000" }} />
-          <Typography variant="h6" sx={{ color: "#000", fontWeight: 600 }}>
+          <AutoAwesomeIcon sx={{ color: "primary.main" }} />
+          <Typography
+            variant="h6"
+            sx={{ color: "primary.main", fontWeight: 600 }}
+          >
             AI-Generated Summary
           </Typography>
           {fromCache && (
             <Typography
               variant="caption"
-              sx={{ color: "rgba(0,0,0,0.8)", ml: "auto" }}
+              sx={{ color: "secondary.main", ml: "auto" }}
             >
               (cached)
             </Typography>
@@ -91,7 +88,7 @@ const CountrySummary = ({ countryName }: CountrySummaryProps) => {
         </Box>
         <Box
           sx={{
-            color: "#000",
+            color: "primary.secondary",
             lineHeight: 1.8,
             "& h1, & h2, & h3": {
               marginTop: 2,

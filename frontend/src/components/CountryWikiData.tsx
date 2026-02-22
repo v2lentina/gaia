@@ -1,92 +1,59 @@
-import { Card, CardContent, Typography, CircularProgress } from "@mui/material";
+import { Card, CardContent } from "@mui/material";
 import type { WikiDataFields } from "../types/api";
+import InfoRow from "./InfoRow";
 
-// Reusable info row component
-const InfoRow = ({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | number;
-}) => (
-  <Typography variant="body1" sx={{ mb: 1 }}>
-    <strong>{label}:</strong> {value}
-  </Typography>
-);
-
-const CountryWikiData = ({
-  wikiData,
-  loading,
-}: {
-  wikiData?: WikiDataFields;
-  loading?: boolean;
-}) => {
-  if (loading) {
-    return (
-      <Card sx={{ boxShadow: 0 }}>
-        <CardContent
-          sx={{ textAlign: "center", py: 4, "&:last-child": { pb: 4 } }}
-        >
-          <CircularProgress size={40} />
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-            Loading additional information...
-          </Typography>
-        </CardContent>
-      </Card>
-    );
-  }
-
+const CountryWikiData = ({ wikiData }: { wikiData?: WikiDataFields }) => {
   if (!wikiData) {
     return null;
   }
 
-  // Build info items dynamically
-  const infoItems: { label: string; value: string | number }[] = [];
-
-  if (wikiData.religions?.length) {
-    infoItems.push({
+  const infoItems = [
+    {
       label: "Religions",
-      value: wikiData.religions.join(", "),
-    });
-  }
-  if (wikiData.ethnicGroups?.length) {
-    infoItems.push({
+      value: wikiData.religions?.join(", "),
+    },
+    {
       label: "Ethnic Groups",
-      value: wikiData.ethnicGroups.join(", "),
-    });
-  }
-  if (wikiData.governmentType?.trim()) {
-    infoItems.push({ label: "Government", value: wikiData.governmentType });
-  }
-  if (wikiData.hdi) {
-    infoItems.push({ label: "HDI", value: wikiData.hdi.toFixed(3) });
-  }
-  if (wikiData.gdpPerCapita) {
-    infoItems.push({
+      value: wikiData.ethnicGroups?.join(", "),
+    },
+    {
+      label: "Government",
+      value: wikiData.governmentType,
+    },
+    {
+      label: "HDI",
+      value: wikiData.hdi?.toFixed(3),
+    },
+    {
       label: "GDP per Capita",
-      value: `$${wikiData.gdpPerCapita.toLocaleString()}`,
-    });
-  }
-  if (wikiData.lifeExpectancy) {
-    infoItems.push({
+      value: wikiData.gdpPerCapita
+        ? `$${wikiData.gdpPerCapita.toLocaleString()}`
+        : undefined,
+    },
+    {
       label: "Life Expectancy",
-      value: `${wikiData.lifeExpectancy.toFixed(1)} years`,
-    });
-  }
-  if (wikiData.literacyRate) {
-    infoItems.push({
+      value: wikiData.lifeExpectancy
+        ? `${wikiData.lifeExpectancy.toFixed(1)} years`
+        : undefined,
+    },
+    {
       label: "Literacy Rate",
-      value: `${wikiData.literacyRate.toFixed(1)}%`,
-    });
-  }
+      value: wikiData.literacyRate
+        ? `${wikiData.literacyRate.toFixed(1)}%`
+        : undefined,
+    },
+  ].filter((item) => !!item.value) as {
+    label: string;
+    value: string | number;
+  }[];
 
   if (infoItems.length === 0) {
     return null;
   }
 
   return (
-    <Card sx={{ boxShadow: 0 }}>
-      <CardContent sx={{ p: 0, "&:last-child": { pb: 0 } }}>
+    <Card>
+      <CardContent>
         {infoItems.map((item) => (
           <InfoRow key={item.label} label={item.label} value={item.value} />
         ))}

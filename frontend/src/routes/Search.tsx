@@ -1,4 +1,3 @@
-// Search.tsx
 import React, { useState, useEffect } from "react";
 import {
   Container,
@@ -27,7 +26,6 @@ const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // State
   const [searchTerm, setSearchTerm] = useState(searchParams.get("query") || "");
   const [searchResults, setSearchResults] = useState<Country[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -37,11 +35,9 @@ const Search = () => {
     "default"
   );
 
-  // Sort countries based on sortOrder
   const sortCountries = (countries: Country[]) => {
     if (sortOrder === "default") return countries;
 
-    // Create a copy of the countries array
     return [...countries].sort((a, b) => {
       const nameA = a.name.common.toLowerCase();
       const nameB = b.name.common.toLowerCase();
@@ -68,10 +64,8 @@ const Search = () => {
     }
   }, []);
 
-  // API call to search countries
   const performSearch = async () => {
     if (!searchTerm.trim()) {
-      // Validate search term and dont send request if empty
       setSearchResults([]);
       return;
     }
@@ -80,7 +74,6 @@ const Search = () => {
     setCurrentPage(1);
 
     try {
-      // Use service function instead of direct axios call
       const countries = await searchCountriesByName(searchTerm);
 
       setSearchResults(countries);
@@ -92,12 +85,10 @@ const Search = () => {
     }
   };
 
-  // Handle search input changes
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
 
-  // Handle search submit
   const handleSearchSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     if (searchTerm.trim()) {
@@ -106,7 +97,6 @@ const Search = () => {
     }
   };
 
-  // Handle country card click
   const handleCountryClick = (countryCca3: string) => {
     navigate(`/country/${countryCca3}`);
   };

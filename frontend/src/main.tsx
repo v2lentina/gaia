@@ -7,7 +7,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import RootLayout from "./routes/RootLayout.tsx";
 import Homepage from "./routes/Homepage.tsx";
 import Search from "./routes/Search.tsx";
-import CountryDetails from "./routes/CountryDetailsPage.tsx";
+import CountryDetails, { countryLoader } from "./routes/CountryDetailsPage.tsx";
 import WorldMap from "./routes/WorldMap.tsx";
 
 const router = createBrowserRouter(
@@ -18,7 +18,11 @@ const router = createBrowserRouter(
       children: [
         { index: true, element: <Homepage /> },
         { path: "search", element: <Search /> },
-        { path: "country/:code", element: <CountryDetails /> },
+        {
+          path: "country/:code",
+          element: <CountryDetails />,
+          loader: countryLoader,
+        },
         { path: "map", element: <WorldMap /> },
       ],
     },

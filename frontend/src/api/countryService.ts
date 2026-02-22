@@ -1,8 +1,23 @@
 import axios from "axios";
 import type { Country, CountryDetails, SummaryResponse } from "../types/api";
+import { ApiError } from "../types/api";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+export const api = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+});
+
+// central error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error.response?.status ?? 500;
+    const message = error.response?.data?.message ?? "Request failed";
+    return Promise.reject(new ApiError(message, status));
+  }
+);
 
 /**
  * Search countries by name
@@ -13,14 +28,10 @@ export const searchCountriesByName = async (
 ): Promise<Country[]> => {
   if (!searchTerm.trim()) return [];
 
-  const { data } = await axios.get<Country[]>(
-    `${API_BASE_URL}/api/countries/search`,
-    {
-      params: { q: searchTerm.trim() },
-      timeout: 10000,
-    }
-  );
-  return data;
+  const response = await api.get<Country[]>("/api/countries/search", {
+    params: { q: searchTerm.trim() },
+  });
+  return response.data;
 };
 
 /**
@@ -33,32 +44,28 @@ export const getCountryByCode = async (
   if (!code.trim()) throw new Error("Invalid country code");
 
   const cca3 = code.toUpperCase();
-
-  const { data } = await axios.get<CountryDetails>(
-    `${API_BASE_URL}/api/countries/${cca3}`,
-    {
-      timeout: 30000,
-    }
-  );
-  return data;
+  const response = await api.get<CountryDetails>(`/api/countries/${cca3}`, {
+    timeout: 30000,
+  });
+  return response.data;
 };
 
 /**
  * Get AI-generated summary for a country
- * Calls: GET /api/summary?q=<countryName>
+ * Calls: POST /api/summary
+ * Body: { country: string }
  */
 export const getCountrySummary = async (
   countryName: string
 ): Promise<SummaryResponse> => {
   if (!countryName.trim()) throw new Error("Invalid country name");
 
-  const { data } = await axios.get<SummaryResponse>(
-    `${API_BASE_URL}/api/summary`,
+  const response = await api.post<SummaryResponse>(
+    "/api/summary",
+    { country: countryName.trim() },
     {
-      params: { q: countryName.trim() },
-      timeout: 60000, // 60 seconds for LLM generation
+      timeout: 60000,
     }
   );
-
-  return data;
+  return response.data;
 };
